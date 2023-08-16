@@ -15,7 +15,7 @@ class AuthController extends Controller
     {
         try {
             $validator = Validator::make($request->all(), [
-                'full_name' => 'required',
+                'full_name' => 'bail|required|regex:/([\p{L} ]+)$/u',
                 'phone_number' => 'bail|required|string|min:10|max:11|unique:users',
                 'email' => 'bail|required|email|unique:users',
                 'password' => 'bail|required|string|regex:/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()]).{8,20}$/'

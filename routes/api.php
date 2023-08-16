@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Controllers\API\AuthController;
-use Illuminate\Http\Request;
+use App\Http\Controllers\API\RoleController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -22,7 +22,17 @@ Route::post('login', [AuthController::class, 'login']);
 //});
 
 Route::middleware('auth:sanctum')->group(function () {
-
-    Route::post('logout', [AuthController::class, 'logout']);
-
+//  User Controller
+    Route::get('logout', [AuthController::class, 'logout']);
+//  Role Controller
+    Route::post('createRole', [RoleController::class, 'createRole']);
+    Route::post('deleteRole', [RoleController::class, 'deleteRole']);
+    Route::put('role/{id}', [RoleController::class, 'updateRole']);
+    Route::post('createPermission', [RoleController::class, 'createPermission']);
+    Route::post('setRole', [RoleController::class, 'setRole']);
+    Route::post('setPermission', [RoleController::class, 'setPermission']);
+//    Route::post('assignRole', [RoleController::class, 'assignRole']);
+//    Route::post('removeRole', [RoleController::class, 'removeRole']);
+//    Route::post('setRole', [RoleController::class, 'setRole']);
+//    Route::post('unsetRole', [RoleController::class, 'unsetRole']);
 });
