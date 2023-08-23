@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string("name");
             $table->string("title");
             $table->string("image");
-            $table->string("status");
+            $table->boolean("isDeleted")->default(false);
             $table->timestamps();
         });
     }

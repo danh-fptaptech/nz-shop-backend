@@ -11,19 +11,21 @@ class PageController extends Controller
 {
 	public function index()
 	{
-		$posts = Page::all();
-		if ($posts->count() > 0) {
+		$pages = Page::all();
+		if ($pages->count() > 0) {
 			return response()->json([
 				"status" => 200,
-				"data" => $posts,
+				"data" => $pages,
 				"message" => "Get all pages successfully."
 			], 200);
 		} else {
-			return response()->json([
-				"status" => 404,
-				"message" => "No records found."
-			], 404);
+			return response()->noContent();
 		}
+		return response()->json([
+			"status" => 404,
+			error_log("aaa"),
+			"message" => "No records found."
+		], 404);
 	}
 
 	public function store(Request $request)
@@ -71,26 +73,26 @@ class PageController extends Controller
 		$page->delete();
 		return response()->json([
 			"status" => 200,
-			"message" => "p\Page was deleted successfully."
+			"message" => "Page was deleted successfully."
 		], 200);
 	}
 
 	public function getOnePage($id)
-  {
-    $page = Page::find($id);
-    if (!$page) {
-      return response()->json([
-        "status" => 404,
-        "message" => "No record found."
-      ], 404);
-    } else {
-      return response()->json([
-        "status" => 200,
-        "data" => $page,
-        "message" => "Post was found successfully."
-      ], 200);
-    }
-  }
+	{
+		$page = Page::find($id);
+		if (!$page) {
+			return response()->json([
+				"status" => 404,
+				"message" => "No record found."
+			], 404);
+		} else {
+			return response()->json([
+				"status" => 200,
+				"data" => $page,
+				"message" => "Post was found successfully."
+			], 200);
+		}
+	}
 
 	public function update(Request $request, $id)
 	{
@@ -104,15 +106,12 @@ class PageController extends Controller
 				404
 			);
 		}
-
+		$validator = null;
 		$validator = Validator::make($request->all(), [
 			"name" => "required",
 			"author" => "required",
 			"content" => "bail|required|max:5000",
 		]);
-		$page->name = $request->name;
-		$page->author = $request->author;
-		$page->content = $request->content;
 
 		if ($validator->fails()) {
 			return response()->json(
@@ -122,6 +121,10 @@ class PageController extends Controller
 				],
 				400
 			);
+		} else {
+			$page->name = $request->name;
+			$page->author = $request->author;
+			$page->content = $request->content;
 		}
 		$page->save();
 		if ($page) {

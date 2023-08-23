@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string("name");
             $table->string("author");
             $table->text("content");
+            $table->boolean("isDeleted")->default(false);
             $table->timestamps();
         });
     }

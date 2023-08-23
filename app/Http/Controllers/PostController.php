@@ -20,16 +20,16 @@ class PostController extends Controller
         "message" => "Get all posts successfully."
       ], 200, []);
     } else {
-      return response()->json([
-        "status" => 404,
-        "message" => "No records found."
-      ], 404);
+      return response()->noContent();
     }
+    return response()->json([
+      "status" => 404,
+      "message" => "No records found."
+    ], 404);
   }
 
   public function store(Request $request)
   {
-    error_reporting();
     $validator = Validator::make($request->all(), [
       "title" => "required",
       "author" => "required",
@@ -46,18 +46,18 @@ class PostController extends Controller
       ], 400);
     } else {
       $post = new Post();
-      $image = $request->file("image");
-      $fileName = time() . "." . $image->getClientOriginalName();
-      $parentPath = "images/post";
+      $filename = time() . "." . $request->file("image")->getClientOriginalName();
+      $parentPath = "images/slider";
       $destinationPath = public_path($parentPath);
-      $imagePath = "$parentPath/$fileName";
-      $post->image = $imagePath;
+      $imagePath = "$parentPath/$filename";
       $post->title = $request->title;
       $post->author = $request->author;
       $post->content = $request->content;
       $post->type = $request->type;
+      $post->image = $imagePath;
+
       $post->save();
-      $request->image->move($destinationPath, $fileName);
+      $request->image->move($destinationPath, $filename);
       if ($post) {
         return response()->json([
           "status" => 201,
@@ -77,18 +77,23 @@ class PostController extends Controller
   {
     $post = Post::find($id);
     if (!$post) {
-      return response()->json([
-        "status" => 404,
-        "message" => "No record found."
-      ], 404);
+      return response()->json(
+        [
+          "status" => 404,
+          "message" => "No record found."
+        ],
+        404
+      );
     }
-    if ($post->image) {
-      $destination = public_path($post->image);
-      if (File::exists($destination)) {
-        File::delete($destination);
-      }
-    }
-    $post->delete();
+    $post->isDeleted = true;
+    $post->save();
+    // if ($post->image) {
+    //   $destination = public_path($post->image);
+    //   if (File::exists($destination)) {
+    //     File::delete($destination);
+    //   }
+    // }
+    // $post->delete();
     return response()->json([
       "status" => 200,
       "message" => "Post was deleted successfully."
@@ -126,6 +131,7 @@ class PostController extends Controller
       $validator = Validator::make($request->all(), [
         "title" => "required",
         "author" => "required",
+        "image.*" => "bail|mimes:jpeg,png,jpg,webp,svg,gif|max:2048",
         "content" => "bail|required|max:5000",
         "type" => "required",
       ]);
@@ -133,15 +139,13 @@ class PostController extends Controller
       $validator = Validator::make($request->all(), [
         "title" => "required",
         "author" => "required",
-        "image" => "bail|mimes:jpeg,png,jpg,webp,svg,gif|max:2048",
         "content" => "bail|required|max:5000",
         "type" => "required",
       ]);
     }
-    $post->title = $request->title;
-    $post->author = $request->author;
-    $post->content = $request->content;
-    $post->type = $request->type;
+    //error_log($request->name);
+
+    //error_log($request->status);
     if ($validator->fails()) {
       return response()->json(
         [
@@ -151,18 +155,24 @@ class PostController extends Controller
         400
       );
     } else {
+
+      $post->title = $request->title;
+      $post->author = $request->author;
+      $post->content = $request->content;
+      $post->type = $request->type;
+
       if ($request->hasFile('image')) {
-        if ($post->image) {
-          $destination = public_path($post->image);
-          if (File::exists($destination)) {
-            File::delete($destination);
-          }
+        $parentPath = "images/post";
+        $destinationPath = public_path($parentPath);
+        $imagePath = "$parentPath/$post->image";
+        if (File::exists($imagePath)) {
+          File::delete($imagePath);
         }
-        $image = $request->file("image");
-        $fileName = "http://127.0.0.1:8000/images/post/"
-          . time() . '.' . $image->getClientOriginalName();
-        $image->move(public_path('images'), $fileName);
-        $post->image = $fileName;
+
+        $filename = time() . "." . $request->file("image")->getClientOriginalName();
+        $imagePath = "$parentPath/$filename";
+        $request->image->move($destinationPath, $filename);
+        $post->image = $imagePath;
       }
       $post->save();
       if ($post) {
@@ -170,7 +180,7 @@ class PostController extends Controller
           [
             "status" => 200,
             "data" => $post,
-            'message' => 'Post was updated successfully.'
+            'message' => 'post was updated successfully.'
           ],
           200
         );

@@ -8,23 +8,26 @@ use App\Models\Slider;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Validator;
 
+use function Laravel\Prompts\error;
+
 class SliderController extends Controller
 {
   public function index()
   {
-    $slider = Slider::all();
-    if ($slider->count() > 0) {
+    $sliders = Slider::all();
+    if ($sliders->count() > 0) {
       return response()->json([
         "status" => 200,
-        "data" => $slider,
+        "data" => $sliders,
         "message" => "Get all sliders successfully."
       ], 200);
     } else {
-      return response()->json([
-        "status" => 404,
-        "message" => "No records found."
-      ], 404);
+      return response()->noContent();
     }
+    return response()->json([
+      "status" => 404,
+      "message" => "No records found."
+    ], 404);
   }
 
   public function store(Request $request)
@@ -34,7 +37,6 @@ class SliderController extends Controller
       "title" => "required",
       "image" => "required",
       "image.*" => "bail|mimes:jpeg,png,jpg,webp,svg,gif|max:2048",
-      "status" => "required",
     ]);
 
     if ($validator->fails()) {
@@ -51,7 +53,6 @@ class SliderController extends Controller
       $slider->name = $request->name;
       $slider->title = $request->title;
       $slider->image = $imagePath;
-      $slider->status = $request->status;
       $slider->save();
       $request->image->move($destinationPath, $filename);
       if ($slider) {
@@ -81,13 +82,8 @@ class SliderController extends Controller
         404
       );
     }
-    if ($slider->image) {
-      $destination = public_path($slider->image);
-      if (File::exists($destination)) {
-        File::delete($destination);
-      }
-    }
-    $slider->delete();
+    $slider->isDeleted = true;
+    $slider->save();
     return response()->json([
       "status" => 200,
       "message" => "Slider was deleted successfully."
@@ -125,19 +121,17 @@ class SliderController extends Controller
       $validator = Validator::make($request->all(), [
         "name" => "required",
         "title" => "required",
-        "status" => "required",
+        "image" => "bail|mimes:jpeg,png,jpg,webp,svg,gif|max:2048",
       ]);
     } else {
       $validator = Validator::make($request->all(), [
         "name" => "required",
         "title" => "required",
-        "image" => "bail|mimes:jpeg,png,jpg,webp,svg,gif|max:2048",
-        "status" => "required",
       ]);
     }
-    $slider->name = $request->name;
-    $slider->title = $request->title;
-    $slider->status = $request->status;
+    //error_log($request->name);
+
+    //error_log($request->status);
     if ($validator->fails()) {
       return response()->json(
         [
@@ -147,18 +141,22 @@ class SliderController extends Controller
         400
       );
     } else {
+
+      $slider->name = $request->name;
+      $slider->title = $request->title;
+
       if ($request->hasFile('image')) {
-        if ($slider->image) {
-          $destination = public_path($slider->image);
-          if (File::exists($destination)) {
-            File::delete($destination);
-          }
+        $parentPath = "images/slider";
+        $destinationPath = public_path($parentPath);
+        $imagePath = "$parentPath/$slider->image";
+        if (File::exists($imagePath)) {
+          File::delete($imagePath);
         }
-        $image = $request->file("image");
-        $fileName = "http://127.0.0.1:8000/images/slider/"
-          . time() . '.' . $image->getClientOriginalName();
-        $image->move(public_path('images'), $fileName);
-        $slider->image = $fileName;
+
+        $filename = time() . "." . $request->file("image")->getClientOriginalName();
+        $imagePath = "$parentPath/$filename";
+        $request->image->move($destinationPath, $filename);
+        $slider->image = $imagePath;
       }
       $slider->save();
       if ($slider) {
