@@ -47,7 +47,7 @@ class PostController extends Controller
     } else {
       $post = new Post();
       $filename = time() . "." . $request->file("image")->getClientOriginalName();
-      $parentPath = "images/slider";
+      $parentPath = "images/post";
       $destinationPath = public_path($parentPath);
       $imagePath = "$parentPath/$filename";
       $post->title = $request->title;
