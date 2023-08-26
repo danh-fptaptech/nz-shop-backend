@@ -24,6 +24,7 @@ Route::post('login', [AuthController::class, 'login']);
 Route::get("/posts", [PostController::class, "index"]);
 Route::post("/posts", [PostController::class, "store"]);
 Route::get("/posts/{id}", [PostController::class, "getOnePost"]);
+Route::get("/posts/{title}", [PostController::class, "getPost"]);
 Route::put("/posts/edit/{id}", [PostController::class, "update"]);
 Route::delete("/posts/delete/{id}", [PostController::class, "delete"]);
 

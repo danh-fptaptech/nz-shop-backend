@@ -33,7 +33,7 @@ class PageController extends Controller
 		$validator = Validator::make($request->all(), [
 			"name" => "required",
 			"author" => "required",
-			"content" => "bail|required|max:5000",
+			"content" => "bail|required|max:10000",
 		]);
 
 		if ($validator->fails()) {
@@ -110,7 +110,7 @@ class PageController extends Controller
 		$validator = Validator::make($request->all(), [
 			"name" => "required",
 			"author" => "required",
-			"content" => "bail|required|max:5000",
+			"content" => "bail|required|max:10000",
 		]);
 
 		if ($validator->fails()) {
@@ -146,59 +146,4 @@ class PageController extends Controller
 			);
 		}
 	}
-	/** Trả về Page View */
-	// public function index()
-	// {
-	// 	$pages = Page::all();
-	// 	return view('page.index', compact('pages'));
-	// }
-
-	// // CREATE NEW PAGE
-	// public function create()
-	// {
-	// 	return view("page.create");
-	// }
-	// public function store(Request $request)
-	// {
-	// 	$request->validate([
-	// 		"name" => "required",
-	// 		"author" => "required",
-	// 		"content" => "bail|required|max:5000",
-	// 	], [
-	// 		"max" => ":attribute tối đa :max ký tự.",
-	// 		"required" => ":attribute bắt buộc nhập.",
-	// 	]);
-	// 	Page::create($request->all());
-	// 	return redirect()->route("page.index")
-	// 		->with("success", "Thêm mới thành công.");
-	// }
-
-	// // EDIT PAGE
-	// public function edit(Page $page)
-	// {
-	// 	return view('page.edit', compact('page'));
-	// }
-	// public function update(Request $request, Page $page)
-	// {
-	// 	$request->validate([
-	// 		"name" => "required",
-	// 		"author" => "required",
-	// 		"content" => "bail|required|max:5000",
-	// 	], [
-	// 		"max" => ":attribute tối đa :max ký tự.",
-	// 		"required" => ":attribute bắt buộc nhập.",
-	// 	]);
-	// 	$page->update($request->all());
-	// 	return redirect()->route('page.index')
-	// 		->with('success', "Cập nhật mới thành công.");
-	// }
-
-	// // DELETE PAGE
-	// public function delete($id)
-	// {
-	// 	$pages = Page::find($id);
-	// 	$pages->delete();
-	// 	return redirect()->route("page.index")
-	// 		->with("success", "Xóa thành công.");
-	// }
 }

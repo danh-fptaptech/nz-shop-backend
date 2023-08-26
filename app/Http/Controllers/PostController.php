@@ -35,7 +35,7 @@ class PostController extends Controller
       "author" => "required",
       "image" => "required",
       "image.*" => "bail|mimes:jpeg,png,jpg,webp,svg,gif|max:2048",
-      "content" => "bail|required|max:5000",
+      "content" => "bail|required|max:10000",
       "type" => "required",
     ]);
 
@@ -55,7 +55,6 @@ class PostController extends Controller
       $post->content = $request->content;
       $post->type = $request->type;
       $post->image = $imagePath;
-
       $post->save();
       $request->image->move($destinationPath, $filename);
       if ($post) {
@@ -117,6 +116,23 @@ class PostController extends Controller
     }
   }
 
+  public function getPost($title)
+  {
+    $post = Post::find($title);
+    if (!$post) {
+      return response()->json([
+        "status" => 404,
+        "message" => "No record found."
+      ], 404);
+    } else {
+      return response()->json([
+        "status" => 200,
+        "data" => $post,
+        "message" => "Post was found successfully."
+      ], 200);
+    }
+  }
+
   public function update(Request $request, $id)
   {
     $post = Post::find($id);
@@ -132,20 +148,17 @@ class PostController extends Controller
         "title" => "required",
         "author" => "required",
         "image.*" => "bail|mimes:jpeg,png,jpg,webp,svg,gif|max:2048",
-        "content" => "bail|required|max:5000",
+        "content" => "bail|required|max:10000",
         "type" => "required",
       ]);
     } else {
       $validator = Validator::make($request->all(), [
         "title" => "required",
         "author" => "required",
-        "content" => "bail|required|max:5000",
+        "content" => "bail|required|max:10000",
         "type" => "required",
       ]);
     }
-    //error_log($request->name);
-
-    //error_log($request->status);
     if ($validator->fails()) {
       return response()->json(
         [
@@ -196,99 +209,4 @@ class PostController extends Controller
     }
   }
 
-
-
-  // public function update(Request $request, $id)
-  // {
-  //   $post = Post::find($id);
-  //   if (!$post) {
-  //     return response()->json([
-  //       "status" => 404,
-  //       "message" => "No record found."
-  //     ], 404);
-  //   }
-  //   $validator = null;
-  //   if ($request->image) {
-  //     $validator = Validator::make($request->all(), [
-  //       "title" => "required",
-  //       "author" => "required",
-  //       "image" => "required",
-  //       "image.*" => "bail|mimes:jpeg,png,jpg,webp,svg,gif|max:2048",
-  //       "content" => "bail|required|max:5000",
-  //       "type" => "required",
-  //     ]);
-  //   } else {
-  //     $validator = Validator::make($request->all(), [
-  //       'name' => 'required',
-  //       'price' => 'required|numeric',
-  //       'image' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
-  //     ]);
-  //   }
-
-  //   $post->name = $request->name;
-  //   $post->price = $request->price;
-  //   if ($validator->fails()) {
-  //     return response()->json(
-  //       [
-  //         "status" => 400,
-  //         'errors' => $validator->errors()
-  //       ],
-  //       400
-  //     );
-  //   } else {
-  //     if ($request->hasFile('image')) {
-  //       if ($post->image) {
-  //         $destination = public_path($post->image);
-  //         if (File::exists($destination)) {
-  //           File::delete($destination);
-  //         }
-  //       }
-  //       $image = $request->file('image');
-  //       $imageName = "http://127.0.0.1:8000/images/"
-  //         . time() . '.' . $image->getClientOriginalName();
-  //       $image->move(public_path('images'), $imageName);
-  //       $post->image = $imageName;
-  //     }
-  //     $post->save();
-  //     if ($post) {
-  //       return response()->json(
-  //         [
-  //           "status" => 200,
-  //           "data" => $post,
-  //           'message' => 'Product created successfully'
-  //         ],
-  //         200
-  //       );
-  //     } else {
-  //       return response()->json(
-  //         [
-  //           "status" => 500,
-  //           'message' => 'Error server!'
-  //         ],
-  //         500
-  //       );
-  //     }
-  //   }
-  // }
-
-  /** Trả về Post View */
-  // public function index()
-  // {
-  //   $posts = Post::all();
-  //   return view("post.index", compact("posts"));
-  // }
-
-
-  // public function deletePost($id)
-  // {
-  //   $post = Post::findOrFail($id);
-  //   $imageName = public_path('image/' . $post->image);
-  //   $post->delete();
-  //   $existedImage = public_path('images' . $imageName);
-  //   if (File::exists($existedImage)) {
-  //     File::delete($existedImage);
-  //   }
-  //   return redirect()->route('post.index')
-  //     ->with('success', 'Xóa thành công.');
-  // }
 }
