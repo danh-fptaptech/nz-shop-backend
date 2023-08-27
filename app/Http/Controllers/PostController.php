@@ -35,6 +35,7 @@ class PostController extends Controller
       "author" => "required",
       "image" => "required",
       "image.*" => "bail|mimes:jpeg,png,jpg,webp,svg,gif|max:2048",
+      "description" => "required",
       "content" => "bail|required|max:10000",
       "type" => "required",
     ]);
@@ -52,6 +53,7 @@ class PostController extends Controller
       $imagePath = "$parentPath/$filename";
       $post->title = $request->title;
       $post->author = $request->author;
+      $post->description = $request->description;
       $post->content = $request->content;
       $post->type = $request->type;
       $post->image = $imagePath;
@@ -116,23 +118,6 @@ class PostController extends Controller
     }
   }
 
-  public function getPost($title)
-  {
-    $post = Post::find($title);
-    if (!$post) {
-      return response()->json([
-        "status" => 404,
-        "message" => "No record found."
-      ], 404);
-    } else {
-      return response()->json([
-        "status" => 200,
-        "data" => $post,
-        "message" => "Post was found successfully."
-      ], 200);
-    }
-  }
-
   public function update(Request $request, $id)
   {
     $post = Post::find($id);
@@ -148,6 +133,7 @@ class PostController extends Controller
         "title" => "required",
         "author" => "required",
         "image.*" => "bail|mimes:jpeg,png,jpg,webp,svg,gif|max:2048",
+        "description" => "required",
         "content" => "bail|required|max:10000",
         "type" => "required",
       ]);
@@ -155,6 +141,7 @@ class PostController extends Controller
       $validator = Validator::make($request->all(), [
         "title" => "required",
         "author" => "required",
+        "description" => "required",
         "content" => "bail|required|max:10000",
         "type" => "required",
       ]);
@@ -171,6 +158,7 @@ class PostController extends Controller
 
       $post->title = $request->title;
       $post->author = $request->author;
+      $post->description = $request->description;
       $post->content = $request->content;
       $post->type = $request->type;
 
@@ -208,5 +196,4 @@ class PostController extends Controller
       }
     }
   }
-
 }
