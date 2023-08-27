@@ -10,6 +10,16 @@ use Illuminate\Support\Facades\Validator;
 
 class PostController extends Controller
 {
+  public function randomPost()
+  {
+    $posts = Post::where("isDeleted", 0)->get()->random(5);
+    return response()->json([
+      "status" => 200,
+      "data" => $posts,
+      "message" => "Get random posts successfully."
+    ], 200);
+  }
+
   public function index()
   {
     $posts = Post::all();
@@ -22,10 +32,6 @@ class PostController extends Controller
     } else {
       return response()->noContent();
     }
-    return response()->json([
-      "status" => 404,
-      "message" => "No records found."
-    ], 404);
   }
 
   public function store(Request $request)
