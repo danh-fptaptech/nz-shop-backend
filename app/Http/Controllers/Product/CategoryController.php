@@ -294,4 +294,31 @@ class CategoryController extends Controller
             200
         );
     }
+
+    public function getProductsByParentCategoryId($id) {
+        $parentCategory = Category::find($id)->get();
+        $categories = Category::where("parent_category_id", $id);
+        $products = Category::find($id)->products()->get();
+        
+        if ($products->count() >= 8) {
+            $products = $products->random(8);
+        }
+        return response()->json([
+            "data" => $products,
+            "message" => "Get successfully!"
+        ], 200);
+    }
+
+    public function getRecursive($id, $result = []) {
+        $categories = Category::where("parent_category_id", $id);
+        foreach ($categories as $category) {
+            getRecursive();
+        }
+        return response()->json(["data" => $result->get()], 200);
+    }
+
+    public function getRecursive1($id) {
+        // 000->orWhere("parent_category_id", "<>", null)->get();
+        
+    }
 }
