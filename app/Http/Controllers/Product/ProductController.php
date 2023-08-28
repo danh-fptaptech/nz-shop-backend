@@ -13,7 +13,7 @@ use Illuminate\Support\Str;
 class ProductController extends Controller
 {
     private $productRules = [
-                "name" => "bail|required|string|min:3|max:25",
+                "name" => "bail|required|string|min:3|max:50",
                 "image" => "bail|required|mimes:jpeg,jpg,png,gif,bmp,webp,svg|max:2048",
                 "gallery" => "required",
                 'gallery.*' => 'bail|mimes:jpeg,jpg,png,gif,bmp,webp,svg|max:2048',
@@ -21,7 +21,7 @@ class ProductController extends Controller
             ];
 
     private $productUpdateRules = [
-        "name" => "bail|required|string|min:3|max:25",
+        "name" => "bail|required|string|min:3|max:50",
         "image" => "bail|mimes:jpeg,jpg,png,gif,bmp,webp,svg|max:2048",
         'gallery.*' => 'bail|mimes:jpeg,jpg,png,gif,bmp,webp,svg|max:2048',
         "description" => "bail|required|string",
@@ -212,7 +212,7 @@ class ProductController extends Controller
 
     public function deleteOneProduct($id) {
         $product = Product::find($id);
-        $variants = Product::find($id)->product_variants;
+        $variants = $product->product_variants;
         
         $product->is_deleted = true;
         foreach ($variants as $variant) {
@@ -232,7 +232,7 @@ class ProductController extends Controller
 
     public function recoverOneProduct($id) {
         $product = Product::find($id);
-        $variants = Product::find($id)->product_variants;
+        $variants = $product->product_variants;
         
         $product->is_deleted = false;
         foreach ($variants as $variant) {
