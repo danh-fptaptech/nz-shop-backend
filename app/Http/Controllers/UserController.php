@@ -10,9 +10,9 @@ use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
 {
-//
-//////////////////////////////////////////////////////////////////////////
-//
+    //
+    //////////////////////////////////////////////////////////////////////////
+    //
 
     public function userStats(): \Illuminate\Http\JsonResponse
     {
@@ -32,9 +32,9 @@ class UserController extends Controller
     }
 
 
-//
-//////////////////////////////////////////////////////////////////////////////////////////////////////
-//
+    //
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
+    //
     public function getListUser(): \Illuminate\Http\JsonResponse
     {
         $users = User::with('roles:id,name')->get();
@@ -54,9 +54,9 @@ class UserController extends Controller
         return response()->json($formattedUsers);
     }
 
-//
-//////////////////////////////////////////////////////////////////////////
-//
+    //
+    //////////////////////////////////////////////////////////////////////////
+    //
     public function getListUserByQuery(Request $request): \Illuminate\Http\JsonResponse
     {
         $query = $request->input('query');
@@ -66,7 +66,26 @@ class UserController extends Controller
         return response()->json($users);
     }
 
-//
-//////////////////////////////////////////////////////////////////////////
-//
+    //
+    //////////////////////////////////////////////////////////////////////////
+    //
+
+    // Tâm chèn code 
+
+    public function getAllUsers()
+    {
+        $users = User::all();
+
+        if ($users->count() > 0) {
+            return response()->json(
+                [
+                    "data" => $users,
+                    "message" => "Get all users successfully",
+                ],
+                200
+            );
+        }
+
+        return response()->noContent();
+    }
 }

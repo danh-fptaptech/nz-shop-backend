@@ -8,7 +8,10 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\Product\ProductController;
 use App\Http\Controllers\Product\CategoryController;
 use App\Http\Controllers\Product\ProductVariantController;
-
+use App\Http\Controllers\Comment\PostCommentController;
+use App\Http\Controllers\Comment\ProductCommentController;
+use App\Http\Controllers\PostController;
+use App\Http\Controllers\Review\ReviewController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -22,6 +25,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+
 Route::post('register', [AuthController::class, 'register']);
 Route::post('verify-email', [AuthController::class, 'verify'])->name('verification.verify');
 Route::post('login', [AuthController::class, 'login']);
@@ -31,6 +35,8 @@ Route::post('reset-password', [AuthController::class, 'resetPassword'])->name('p
 
 Route::middleware('auth:api')->get('isLogin', [AuthController::class, 'isLogin']);
 Route::middleware('auth:api')->get('isAdmin', [AuthController::class, 'isAdmin']);
+
+
 //Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 //    return $request->user();
 //});
@@ -105,3 +111,31 @@ Route::put("/variants/delete/{id}", [ProductVariantController::class, "deleteOne
 Route::put("/variants/recover/{id}", [ProductVariantController::class, "recoverOneVariant"]);
 Route::put("/variants/force-recover/{id}", [ProductVariantController::class, "forceRecoverOneVariant"]);
 Route::put("/variants/update/{id}", [ProductVariantController::class, "updateOneVariant"]);
+
+//Tam 
+Route::get("/post-comments", [PostCommentController::class, "getAllComments"]);
+Route::post("/post-comments", [PostCommentController::class, "createOneComment"]);
+Route::put("/post-comments/approve/{id}", [PostCommentController::class, "approveOneComment"]);
+Route::put("/post-comments/delete/{id}", [PostCommentController::class, "deleteOneComment"]);
+Route::get("/post-comments/{id}/post-feedbacks", [PostCommentController::class, "getAllPostFeedBacksById"]);
+
+Route::get("/users", [UserController::class, "getAllUsers"]);
+
+Route::get("/posts", [PostController::class, "getAllPosts"]);
+Route::get("/posts/{id}/comments", [PostController::class, "getAllComments"]);
+
+
+Route::get("/reviews", [ReviewController::class, "getAllReviews"]);
+Route::post("/reviews", [ReviewController::class, "createOneReview"]);
+Route::put("/reviews/approve/{id}", [ReviewController::class, "approveOneReview"]);
+Route::put("/reviews/delete/{id}", [ReviewController::class, "deleteOneReview"]);
+
+Route::get("/product-comments", [ProductCommentController::class, "getAllCommentsProduct"]);
+Route::post("/product-comments", [ProductCommentController::class, "createOneCommentProduct"]);
+Route::put("/product-comments/approve/{id}", [ProductCommentController::class, "approveOneCommentProduct"]);
+Route::put("/product-comments/delete/{id}", [ProductCommentController::class, "deleteOneCommentProduct"]);
+Route::get("/product-comments/{id}/product-feedbacks", [ProductCommentController::class, "getAllProductFeedBacksById"]);
+
+Route::get("/products", [ProductController::class, "getAllProducts"]);
+Route::get("/products/{id}/comments", [ProductController::class, "getAllComments"]);
+Route::get("/products/{id}/reviews", [ProductController::class, "getAllReviews"]);

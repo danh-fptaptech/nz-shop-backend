@@ -12,11 +12,23 @@ class Product extends Model
     // use HasFactory;
     protected $fillable = ["category_id"];
 
-    public function product_variants(): HasMany {
+    public function product_variants(): HasMany
+    {
         return $this->hasMany(Product_variant::class);
     }
 
-    public function category(): BelongsTo {
+    public function category(): BelongsTo
+    {
         return $this->belongsTo(Category::class);
+    }
+
+    public function comments(): HasMany
+    {
+        return $this->hasMany(Product_comment::class);
+    }
+
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class);
     }
 }
