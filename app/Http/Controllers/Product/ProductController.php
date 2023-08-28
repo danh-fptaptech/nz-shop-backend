@@ -8,78 +8,75 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
     private $productRules = [
-        "name" => "bail|required|string|min:3|max:50",
-        "image" => "bail|required|mimes:jpeg,jpg,png,gif,bmp,webp,svg|max:2048",
-        "gallery" => "required",
-        'gallery.*' => 'bail|mimes:jpeg,jpg,png,gif,bmp,webp,svg|max:2048',
-        "short_description" => "bail|required|string",
-        "long_description" => "bail|required|string",
-    ];
+                "name" => "bail|required|string|min:3|max:50",
+                "image" => "bail|required|mimes:jpeg,jpg,png,gif,bmp,webp,svg|max:2048",
+                "gallery" => "required",
+                'gallery.*' => 'bail|mimes:jpeg,jpg,png,gif,bmp,webp,svg|max:2048',
+                "description" => "bail|required|string",
+            ];
 
     private $productUpdateRules = [
         "name" => "bail|required|string|min:3|max:50",
         "image" => "bail|mimes:jpeg,jpg,png,gif,bmp,webp,svg|max:2048",
         'gallery.*' => 'bail|mimes:jpeg,jpg,png,gif,bmp,webp,svg|max:2048',
-        "short_description" => "bail|required|string",
-        "long_description" => "bail|required|string",
+        "description" => "bail|required|string",
     ];
 
     private $productMessages = [
-        "required" => "Không được bỏ trống!",
-        "name.min" => "Tên quá ngắn!",
-        "name.max" => "Tên quá dài!",
-        "image.required" => "Chưa chọn hình ảnh!",
-        "image.max" => "Hình ảnh không được vượt quá 2MB!",
-        "image.mimes" => "Tệp hình ảnh phải là tệp jpeg, png, jpg, gif, webp, svg hoặc bmp!",
-        "gallery.required" => "Chưa chọn hình ảnh!",
-        "gallery.*.max" => "Mỗi tệp hình ảnh không được vượt quá 2MB!",
-        "gallery.*.mimes" => "Tệp hình ảnh phải là tệp jpeg, png, jpg, gif, webp, svg hoặc bmp!",
-    ];
+                "required" => "Không được bỏ trống!",
+                "name.min" => "Tên quá ngắn!",
+                "name.max" => "Tên quá dài!",
+                "image.required" => "Chưa chọn hình ảnh!",
+                "image.max" => "Hình ảnh không được vượt quá 2MB!",
+                "image.mimes" => "Tệp hình ảnh phải là tệp jpeg, png, jpg, gif, webp, svg hoặc bmp!",
+                "gallery.required" => "Chưa chọn hình ảnh!",
+                "gallery.*.max" => "Mỗi tệp hình ảnh không được vượt quá 2MB!",
+                "gallery.*.mimes" => "Tệp hình ảnh phải là tệp jpeg, png, jpg, gif, webp, svg hoặc bmp!",
+            ];
 
     private $variantRules = [
-        'sku' => "bail|required|string",
-        'quantity' => 'bail|required|integer',
-        'origin_price' => 'bail|required|numeric|min:1000',
-        'sell_price' => 'bail|required|numeric|min:1000',
-        'discount_price' => 'bail|numeric|min:1000',
-    ];
+                'sku' => "bail|required|string",
+                'quantity' => 'bail|required|integer',
+                'origin_price' => 'bail|required|numeric|min:1000',
+                'sell_price' => 'bail|required|numeric|min:1000',
+                'discount_price' => 'bail|numeric|min:1000',
+            ];
 
     private $variantMessages = [
-        "required" => "Không được bỏ trống!",
-        "integer" => "Phải là số!",
-        "numeric" => "Phải là số!",
-        "min" => "Giá phải lớn hơn hoặc bằng 1000 VND",
-    ];
+                "required" => "Không được bỏ trống!",
+                "integer" => "Phải là số!",
+                "numeric" => "Phải là số!",
+                "min" => "Giá phải lớn hơn hoặc bằng 1000 VND",
+            ];
 
-    private function serverError($data)
-    {
+    private function serverError($data) {
         return response()->json(
             [
                 "data" => $data,
-                "message" => "Something went wrong!!"
-            ],
+                "message"=> "Something went wrong!!"
+            ], 
             500
-        );
+        ); 
     }
 
-    public function getAllProducts()
-    {
+    public function getAllProducts() {
         $products = Product::all();
         if (!$products) {
             return $this->serverError("Get all products");
         }
-
+        
         if ($products->count() > 0) {
             return response()->json(
                 [
                     "status" => 200,
                     "data" => $products,
                     "message" => "Get all products successfully!"
-                ],
+                ], 
                 200
             );
         }
@@ -87,8 +84,7 @@ class ProductController extends Controller
         return response()->noContent();
     }
 
-    public function createOneProduct(Request $request)
-    {
+    public function createOneProduct(Request $request) {
         DB::beginTransaction();
         $validator = Validator::make($request->all(), $this->productRules, $this->productMessages);
         $errors = [];
@@ -110,19 +106,17 @@ class ProductController extends Controller
         $product = new Product();
         $product->name = $request->name;
         $product->slug = $this->create_slug($request->name);
-        $product->short_description = $request->short_description;
-        $product->long_description = $request->long_description;
+        $product->description = $request->description;
 
         if ($request->has('category_id')) {
             $product->category_id = $request->category_id;
         }
 
         $filename = time() . '_' . $request->file("image")->getClientOriginalName();
-        $parentPath = "images/product";
-        $destinationPath = public_path($parentPath);
+        $parentPath = "images/product";       
         $imagePath = $request->file("image")->storeAs($parentPath, $filename, 'public');
-        $product->image = $imagePath;
-
+        $product->image = $imagePath;   
+    
 
         $product->gallery = "";
         foreach ($request->file("gallery") as $index => $image) {
@@ -130,10 +124,9 @@ class ProductController extends Controller
                 $product->gallery .= "|";
             }
             $filename = time() . '_' . $image->getClientOriginalName();
-            $parentPath = "images/product/gallery";
-            $destinationPath = public_path($parentPath);
+            $parentPath = "images/product/gallery";      
             $imagePath = $image->storeAs($parentPath, $filename, 'public');
-            $product->gallery .= $imagePath;
+            $product->gallery .= $imagePath;   
         }
 
         $product->save();
@@ -148,21 +141,20 @@ class ProductController extends Controller
                 [
                     "status" => 201,
                     "data" => $product,
-                    "message" => "Create a product successfully!"
-                ],
+                    "message"=> "Create a product successfully!"
+                ], 
                 201
             );
-        }
+        } 
 
         return $this->serverError("Create a product");
     }
 
-    public function createVariantsByProductId($productId)
-    {
-
+    public function createVariantsByProductId($productId) {
+        
         $request = request();
         $more = json_decode($request->more);
-
+        
         $errors = [];
         $isValid = true;
 
@@ -176,10 +168,11 @@ class ProductController extends Controller
 
             $error = [];
             foreach ($validator->errors()->messages() as $key => $value) {
-                $error[$key] = $value[0];
+                $error[$key] = $value[0]; 
             }
             array_push($errors, $error);
-        } else {
+        }
+        else {
 
             foreach ($more as &$item) {
                 $item = (array) $item;
@@ -191,14 +184,14 @@ class ProductController extends Controller
                 }
 
                 $error = [];
-                foreach ($validator->errors()->messages() as $key => $value) {
-                    $error[$key] = $value[0];
+                foreach ($validator->errors()->messages() as $key => $value) {                
+                    $error[$key] = $value[0]; 
                 }
                 array_push($errors, $error);
             }
         }
 
-        if (!$isValid) {
+        if (!$isValid) {   
             DB::rollback();
             return response()->json(
                 [
@@ -210,18 +203,17 @@ class ProductController extends Controller
         }
 
         $variants = Product::find($productId)->product_variants()->createMany($more);
-
+        
         if ($variants->count() === 0) {
             DB::rollback();
             return $this->serverError("Create variants");
         }
     }
 
-    public function deleteOneProduct($id)
-    {
+    public function deleteOneProduct($id) {
         $product = Product::find($id);
-        $variants = Product::find($id)->product_variants;
-
+        $variants = $product->product_variants;
+        
         $product->is_deleted = true;
         foreach ($variants as $variant) {
             $variant->is_deleted = true;
@@ -233,16 +225,15 @@ class ProductController extends Controller
         return response()->json(
             [
                 "message" => "Delete successfully!"
-            ],
+            ], 
             200
         );
     }
 
-    public function recoverOneProduct($id)
-    {
+    public function recoverOneProduct($id) {
         $product = Product::find($id);
-        $variants = Product::find($id)->product_variants;
-
+        $variants = $product->product_variants;
+        
         $product->is_deleted = false;
         foreach ($variants as $variant) {
             $variant->is_deleted = false;
@@ -254,27 +245,25 @@ class ProductController extends Controller
         return response()->json(
             [
                 "message" => "Recover successfully!"
-            ],
+            ], 
             200
         );
     }
 
-    public function getAllVariantsByProductId($id)
-    {
+    public function getAllVariantsByProductId($id) {
         $variants = Product::find($id)->product_variants;
 
         return response()->json(
             [
                 "status" => 200,
-                "data" => $variants,
+                "data" => ["variants" => $variants],
                 "message" => "Get all variants successfully!"
-            ],
+            ], 
             200
         );
     }
 
-    public function getLowPriceVariantByProductId($id)
-    {
+    public function getLowPriceVariantByProductId($id) {
         $variant = Product::find($id)->product_variants()->orderBy('sell_price', 'asc')->first();
 
         return response()->json(
@@ -282,12 +271,11 @@ class ProductController extends Controller
                 "status" => 200,
                 "data" =>  $variant,
                 "message" => "Get low price variant successfully!"
-            ],
+            ], 
             200
         );
     }
-    public function updateOneProduct(Request $request, $id)
-    {
+    public function updateOneProduct(Request $request, $id) {
         $validator = Validator::make($request->all(), $this->productUpdateRules, $this->productMessages);
         $errors = [];
         foreach ($validator->errors()->messages() as $key => $value) {
@@ -323,24 +311,23 @@ class ProductController extends Controller
         $product = Product::find($id);
 
         $product->name = $request->name;
-        $product->short_description = $request->short_description;
-        $product->long_description = $request->long_description;
+        $product->description = $request->description;
 
         if ($request->has('category_id')) {
             $product->category_id = $request->category_id;
         }
-
+        
         if ($request->hasFile('image')) {
             Storage::delete("public/$product->image");
 
-            $filename = time() . '_' . $request->file("image")->getClientOriginalName();
-            $parentPath = "images/product";
+            $filename = time() . '_' . $request->file("image")->getClientOriginalName(); 
+            $parentPath = "images/product";         
             $imagePath = $request->file("image")->storeAs($parentPath, $filename, 'public');
-            $product->image = $imagePath;
+            $product->image = $imagePath;   
         }
 
         if ($request->hasFile('gallery')) {
-            foreach (explode("|", $product->gallery) as $file) {
+            foreach(explode("|", $product->gallery) as $file) {
                 Storage::delete("public/$file");
             }
 
@@ -351,23 +338,23 @@ class ProductController extends Controller
                 }
                 $filename = time() . '_' . $image->getClientOriginalName();
                 $parentPath = "images/product/gallery";
+                
                 $imagePath = $image->storeAs($parentPath, $filename, 'public');
-                $product->gallery .= $imagePath;
+                $product->gallery .= $imagePath;   
             }
         }
-
+    
         $product->save();
 
         return response()->json(
             [
                 "message" => "Update a product successfully!"
-            ],
+            ], 
             200
         );
     }
 
-    public function getOneProductBySlug($slug)
-    {
+    public function getOneProductBySlug($slug) {
         error_log($slug);
         $product = Product::where('slug', 'like', $slug)->first();
         return response()->json(["data" => $product], 200);

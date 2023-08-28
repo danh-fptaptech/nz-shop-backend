@@ -42,7 +42,7 @@ class PostController extends Controller
       "image" => "required",
       "image.*" => "bail|mimes:jpeg,png,jpg,webp,svg,gif|max:2048",
       "description" => "required",
-      "content" => "bail|required|max:10000",
+      "content" => "required",
       "type" => "required",
     ]);
 
@@ -140,7 +140,7 @@ class PostController extends Controller
         "author" => "required",
         "image.*" => "bail|mimes:jpeg,png,jpg,webp,svg,gif|max:2048",
         "description" => "required",
-        "content" => "bail|required|max:10000",
+        "content" => "required",
         "type" => "required",
       ]);
     } else {
@@ -148,7 +148,7 @@ class PostController extends Controller
         "title" => "required",
         "author" => "required",
         "description" => "required",
-        "content" => "bail|required|max:10000",
+        "content" => "required",
         "type" => "required",
       ]);
     }

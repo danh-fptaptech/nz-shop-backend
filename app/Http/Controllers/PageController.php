@@ -33,7 +33,7 @@ class PageController extends Controller
 		$validator = Validator::make($request->all(), [
 			"name" => "required",
 			"author" => "required",
-			"content" => "bail|required|max:10000",
+			"content" => "required",
 		]);
 		if ($validator->fails()) {
 			return response()->json([
@@ -109,7 +109,7 @@ class PageController extends Controller
 		$validator = Validator::make($request->all(), [
 			"name" => "required",
 			"author" => "required",
-			"content" => "bail|required|max:10000",
+			"content" => "required",
 		]);
 
 		if ($validator->fails()) {

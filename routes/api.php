@@ -41,31 +41,33 @@ Route::put("/categories/recover/{id}", [CategoryController::class, "recoverOneCa
 Route::put("/categories/recover-recursively/{id}", [CategoryController::class, "recoverRecursiveCategories"]);
 Route::get("/categories/{id}", [CategoryController::class, "getSubCategories"]);
 Route::put("/categories/update/{id}", [CategoryController::class, "updateOneCategory"]);
-Route::get("/recursive-categories/{id}/products", [CategoryController::class, "getProductsByRecursiveCategoryId"]);
+Route::get("/recursive-categories/{id}/products/{numbers?}", [CategoryController::class, "getProductsByRecursiveCategoryId"]);
 Route::get("/recursive-categories/{id}", [CategoryController::class, "getRecursiveCategories"]);
 
 Route::put("/variants/delete/{id}", [ProductVariantController::class, "deleteOneVariant"]);
 Route::put("/variants/recover/{id}", [ProductVariantController::class, "recoverOneVariant"]);
 Route::put("/variants/force-recover/{id}", [ProductVariantController::class, "forceRecoverOneVariant"]);
 Route::put("/variants/update/{id}", [ProductVariantController::class, "updateOneVariant"]);
+
+Route::post("/description", [DescriptionController::class, "storeImageUpload"]);
 //Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 //    return $request->user();
 //});
 
 Route::middleware('auth:sanctum')->group(function () {
-    //  User Controller
+//  User Controller
     Route::get('logout', [AuthController::class, 'logout']);
-    //  Role Controller
+//  Role Controller
     Route::post('createRole', [RoleController::class, 'createRole']);
     Route::post('deleteRole', [RoleController::class, 'deleteRole']);
     Route::put('role/{id}', [RoleController::class, 'updateRole']);
     Route::post('createPermission', [RoleController::class, 'createPermission']);
     Route::post('setRole', [RoleController::class, 'setRole']);
     Route::post('setPermission', [RoleController::class, 'setPermission']);
-    //    Route::post('assignRole', [RoleController::class, 'assignRole']);
-    //    Route::post('removeRole', [RoleController::class, 'removeRole']);
-    //    Route::post('setRole', [RoleController::class, 'setRole']);
-    //    Route::post('unsetRole', [RoleController::class, 'unsetRole']);
+//    Route::post('assignRole', [RoleController::class, 'assignRole']);
+//    Route::post('removeRole', [RoleController::class, 'removeRole']);
+//    Route::post('setRole', [RoleController::class, 'setRole']);
+//    Route::post('unsetRole', [RoleController::class, 'unsetRole']);
 });
 
 Route::get("/posts", [PostController::class, "index"]);
