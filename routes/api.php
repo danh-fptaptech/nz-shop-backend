@@ -3,6 +3,7 @@
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\PageController;
 use Illuminate\Http\Request;
+use App\Http\Controllers\API\RoleController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\SliderController;
@@ -71,6 +72,7 @@ Route::middleware('auth:sanctum')->group(function () {
 //    Route::post('removeRole', [RoleController::class, 'removeRole']);
 //    Route::post('setRole', [RoleController::class, 'setRole']);
 //    Route::post('unsetRole', [RoleController::class, 'unsetRole']);
+
 });
 
 Route::get("/posts", [PostController::class, "index"]);
@@ -93,10 +95,4 @@ Route::get("/sliders/{id}", [SliderController::class, "getOneSlider"]);
 Route::put("/sliders/edit/{id}", [SliderController::class, "update"]);
 Route::delete("/sliders/delete/{id}", [SliderController::class, "delete"]);
 
-//Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-//    return $request->user();
-//});
 
-Route::middleware('auth:sanctum')->group(function () {
-    Route::post('logout', [AuthController::class, 'logout']);
-});

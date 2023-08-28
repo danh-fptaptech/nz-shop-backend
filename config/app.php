@@ -7,6 +7,14 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | My custom
+    |--------------------------------------------------------------------------
+    |
+    */
+
+    'name' => env('APP_NAME', 'Laravel'),
+    /*
+    |--------------------------------------------------------------------------
     | Application Name
     |--------------------------------------------------------------------------
     |
@@ -16,7 +24,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Laravel'),
+    'vue_api_key' => env('VUE_API_KEY'),
 
     /*
     |--------------------------------------------------------------------------
@@ -167,6 +175,7 @@ return [
         App\Providers\AuthServiceProvider::class,
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
+        Spatie\Permission\PermissionServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
     ])->toArray(),
 
