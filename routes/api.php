@@ -13,7 +13,6 @@ use App\Http\Controllers\Comment\ProductCommentController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\Review\ReviewController;
 use App\Http\Controllers\PageController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SliderController;
 use App\Http\Controllers\Description\DescriptionController;
