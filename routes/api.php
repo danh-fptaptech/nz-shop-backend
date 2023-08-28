@@ -9,6 +9,7 @@ use App\Http\Controllers\SliderController;
 use App\Http\Controllers\Product\ProductController;
 use App\Http\Controllers\Product\ProductVariantController;
 use App\Http\Controllers\Product\CategoryController;
+use App\Http\Controllers\Description\DescriptionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,6 +24,8 @@ use App\Http\Controllers\Product\CategoryController;
 
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
+
+Route::post("/description", [DescriptionController::class, "storeImageUpload"]);
 
 Route::get("/products", [ProductController::class, "getAllProducts"]);
 Route::post("/products", [ProductController::class, "createOneProduct"]);
