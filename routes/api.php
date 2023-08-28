@@ -5,7 +5,6 @@ use App\Http\Controllers\CouponController;
 use App\Http\Controllers\ListAddressController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
-use App\Http\Middleware\VerifyApiKey;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -18,6 +17,7 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
+
 Route::post('register', [AuthController::class, 'register']);
 Route::post('verify-email', [AuthController::class, 'verify'])->name('verification.verify');
 Route::post('login', [AuthController::class, 'login']);
@@ -32,7 +32,7 @@ Route::middleware('auth:api')->get('isAdmin', [AuthController::class, 'isAdmin']
 //});
 
 Route::middleware('auth:sanctum')->group(function () {
-//  User Controller
+    //  User Controller
     Route::get('logout', [AuthController::class, 'logout']);
     Route::get('reSentVerify', [AuthController::class, 'reSentVerify']);
     Route::post('createUser', [AuthController::class, 'createUser']);
@@ -41,7 +41,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('users/{id}', [AuthController::class, 'infoUserID']);
     Route::post('searchUsers', [UserController::class, 'getListUserByQuery']);
 
-//  Role Controller
+    //  Role Controller
     Route::post('createRole', [RoleController::class, 'createRole']);
     Route::post('createRoleWithPermissions', [RoleController::class, 'createRoleWithPermissions']);
     Route::post('deleteRole', [RoleController::class, 'deleteRole']);
@@ -51,17 +51,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('setPermission', [RoleController::class, 'setPermission']);
     Route::get('listRoles', [RoleController::class, 'listRoles']);
     Route::get('listPermissions', [RoleController::class, 'listPermissions']);
-//    Route::post('assignRole', [RoleController::class, 'assignRole']);
-//    Route::post('removeRole', [RoleController::class, 'removeRole']);
-//    Route::post('setRole', [RoleController::class, 'setRole']);
-//    Route::post('unsetRole', [RoleController::class, 'unsetRole']);
+    //    Route::post('assignRole', [RoleController::class, 'assignRole']);
+    //    Route::post('removeRole', [RoleController::class, 'removeRole']);
+    //    Route::post('setRole', [RoleController::class, 'setRole']);
+    //    Route::post('unsetRole', [RoleController::class, 'unsetRole']);
 
-//    Statistics
+    //    Statistics
 
     Route::get('userStats', [UserController::class, 'userStats']);
     Route::get('getListUser', [UserController::class, 'getListUser']);
 
-//    Manager Coupon
+    //    Manager Coupon
     Route::post('createCoupon', [CouponController::class, 'createCoupon']);
     Route::get('generateUniqueCode', [CouponController::class, 'generateUniqueCode']);
     Route::get('getListCoupon', [CouponController::class, 'getListCoupon']);
@@ -69,8 +69,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('deleteCoupon', [CouponController::class, 'deleteCoupon']);
     Route::put('updateCoupon/{id}', [CouponController::class, 'updateCoupon']);
     Route::get('getValueByCode/{code}', [CouponController::class, 'getValueByCode']);
-//
-//    Manager ListAddress
+    //
+    //    Manager ListAddress
     Route::post('createAddress', [ListAddressController::class, 'createAddress']);
     Route::get('showListAddressOfUser', [ListAddressController::class, 'showListAddressOfUser']);
     Route::get('getOneAddressOfUserByID/{id}', [ListAddressController::class, 'getOneAddressOfUserByID']);
