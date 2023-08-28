@@ -16,6 +16,7 @@ use App\Http\Controllers\PageController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SliderController;
+use App\Http\Controllers\Description\DescriptionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -90,6 +91,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('editAddressByID/{id}', [ListAddressController::class, 'editAddressByID']);
 });
 // Long 
+Route::post("/description", [DescriptionController::class, "storeImageUpload"]);
+
 Route::get("/products", [ProductController::class, "getAllProducts"]);
 Route::post("/products", [ProductController::class, "createOneProduct"]);
 Route::put("/products/delete/{id}", [ProductController::class, "deleteOneProduct"]);
