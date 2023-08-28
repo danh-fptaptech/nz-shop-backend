@@ -100,7 +100,7 @@ class CategoryController extends Controller
  
         if ($request->hasFile("icon")) {
             $filename = time() . '_' . $request->file("icon")->getClientOriginalName();
-            $parentPath = "images/category/icon";    
+            $parentPath = "images/category/icon";  
             $imagePath = $request->file("icon")->storeAs($parentPath, $filename, 'public');
             $category->icon = $imagePath;
         }      
@@ -258,7 +258,7 @@ class CategoryController extends Controller
             Storage::delete("public/$category->image");
 
             $filename = time() . '_' . $request->file("image")->getClientOriginalName(); 
-            $parentPath = "images/category";    
+            $parentPath = "images/category";
             $imagePath = $request->file("image")->storeAs($parentPath, $filename, 'public');
             $category->image = $imagePath;   
         }
