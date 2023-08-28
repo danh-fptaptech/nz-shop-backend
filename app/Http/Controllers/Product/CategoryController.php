@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Collection;
 
 class CategoryController extends Controller
 {
@@ -259,7 +260,7 @@ class CategoryController extends Controller
             Storage::delete("public/$category->image");
 
             $filename = time() . '_' . $request->file("image")->getClientOriginalName(); 
-             $parentPath = "images/category";  
+            $parentPath = "images/category";  
             $destinationPath = public_path($parentPath);
             $imagePath = $request->file("image")->storeAs($parentPath, $filename, 'public');
             $category->image = $imagePath;   
@@ -295,30 +296,28 @@ class CategoryController extends Controller
         );
     }
 
-    public function getProductsByParentCategoryId($id) {
-        $parentCategory = Category::find($id)->get();
-        $categories = Category::where("parent_category_id", $id);
-        $products = Category::find($id)->products()->get();
-        
-        if ($products->count() >= 8) {
-            $products = $products->random(8);
+    public function getProductsByRecursiveCategoryId($id, $numbers = null) {
+        $firstCategoryArray = Category::find($id);
+        $categories = $this->getRecursiveCategories($id)->push($firstCategoryArray);
+        $products = new Collection;
+        foreach ($categories as $category) {
+            $products = $products->merge($category->products);
+        }
+        if ($numbers && $products->count() > (int) $numbers) {
+            $products = $products->random($numbers);
         }
         return response()->json([
-            "data" => $products,
+            "data" =>  $products,
             "message" => "Get successfully!"
         ], 200);
     }
 
-    public function getRecursive($id, $result = []) {
-        $categories = Category::where("parent_category_id", $id);
+    public function getRecursiveCategories($id, &$result = new Collection) {
+        $categories = Category::where("parent_category_id", $id)->get();
+        $result = $result->merge($categories);
         foreach ($categories as $category) {
-            getRecursive();
+            $this->getRecursiveCategories($category->id, $result);
         }
-        return response()->json(["data" => $result->get()], 200);
-    }
-
-    public function getRecursive1($id) {
-        // 000->orWhere("parent_category_id", "<>", null)->get();
-        
+        return $result;
     }
 }

@@ -25,8 +25,9 @@ Route::get("/products", [ProductController::class, "getAllProducts"]);
 Route::post("/products", [ProductController::class, "createOneProduct"]);
 Route::put("/products/delete/{id}", [ProductController::class, "deleteOneProduct"]);
 Route::put("/products/recover/{id}", [ProductController::class, "recoverOneProduct"]);
-Route::get("/products/{id}", [ProductController::class, "getProductVariant"]);
-Route::get("/products/a/{slug}", [ProductController::class, "getOneProductBySlug"]);
+Route::get("/products/{id}/variants", [ProductController::class, "getAllVariantsByProductId"]);
+Route::get("/products/{id}/variant", [ProductController::class, "getLowPriceVariantByProductId"]);
+Route::get("/products/{slug}", [ProductController::class, "getOneProductBySlug"]);
 Route::put("/products/update/{id}", [ProductController::class, "updateOneProduct"]);
 
 Route::get("/categories", [CategoryController::class, "getAllCategories"]);
@@ -37,8 +38,8 @@ Route::put("/categories/recover/{id}", [CategoryController::class, "recoverOneCa
 Route::put("/categories/recover-recursively/{id}", [CategoryController::class, "recoverRecursiveCategories"]);
 Route::get("/categories/{id}", [CategoryController::class, "getSubCategories"]);
 Route::put("/categories/update/{id}", [CategoryController::class, "updateOneCategory"]);
-Route::get("/categories/{id}/products", [CategoryController::class, "getProductsByCategoryId"]);
-Route::get("/dai/{id}", [CategoryController::class, "getRecursive"]);
+Route::get("/recursive-categories/{id}/products/{numbers?}", [CategoryController::class, "getProductsByRecursiveCategoryId"]);
+Route::get("/recursive-categories/{id}", [CategoryController::class, "getRecursiveCategories"]);
 
 Route::put("/variants/delete/{id}", [ProductVariantController::class, "deleteOneVariant"]);
 Route::put("/variants/recover/{id}", [ProductVariantController::class, "recoverOneVariant"]);

@@ -17,16 +17,14 @@ class ProductController extends Controller
                 "image" => "bail|required|mimes:jpeg,jpg,png,gif,bmp,webp,svg|max:2048",
                 "gallery" => "required",
                 'gallery.*' => 'bail|mimes:jpeg,jpg,png,gif,bmp,webp,svg|max:2048',
-                "short_description" => "bail|required|string",
-                "long_description" => "bail|required|string",
+                "description" => "bail|required|string",
             ];
 
     private $productUpdateRules = [
         "name" => "bail|required|string|min:3|max:25",
         "image" => "bail|mimes:jpeg,jpg,png,gif,bmp,webp,svg|max:2048",
         'gallery.*' => 'bail|mimes:jpeg,jpg,png,gif,bmp,webp,svg|max:2048',
-        "short_description" => "bail|required|string",
-        "long_description" => "bail|required|string",
+        "description" => "bail|required|string",
     ];
 
     private $productMessages = [
@@ -108,16 +106,14 @@ class ProductController extends Controller
         $product = new Product();
         $product->name = $request->name;
         $product->slug = $this->create_slug($request->name);
-        $product->short_description = $request->short_description;
-        $product->long_description = $request->long_description;
+        $product->description = $request->description;
 
         if ($request->has('category_id')) {
             $product->category_id = $request->category_id;
         }
 
         $filename = time() . '_' . $request->file("image")->getClientOriginalName();
-        $parentPath = "images/product";
-        $destinationPath = public_path($parentPath);
+        $parentPath = "images/product";       
         $imagePath = $request->file("image")->storeAs($parentPath, $filename, 'public');
         $product->image = $imagePath;   
     
@@ -128,8 +124,7 @@ class ProductController extends Controller
                 $product->gallery .= "|";
             }
             $filename = time() . '_' . $image->getClientOriginalName();
-            $parentPath = "images/product/gallery";
-            $destinationPath = public_path($parentPath);
+            $parentPath = "images/product/gallery";      
             $imagePath = $image->storeAs($parentPath, $filename, 'public');
             $product->gallery .= $imagePath;   
         }
@@ -255,7 +250,7 @@ class ProductController extends Controller
         );
     }
 
-    public function getProductVariant($id) {
+    public function getAllVariantsByProductId($id) {
         $variants = Product::find($id)->product_variants;
 
         return response()->json(
@@ -268,6 +263,18 @@ class ProductController extends Controller
         );
     }
 
+    public function getLowPriceVariantByProductId($id) {
+        $variant = Product::find($id)->product_variants()->orderBy('sell_price', 'asc')->first();
+
+        return response()->json(
+            [
+                "status" => 200,
+                "data" =>  $variant,
+                "message" => "Get low price variant successfully!"
+            ], 
+            200
+        );
+    }
     public function updateOneProduct(Request $request, $id) {
         $validator = Validator::make($request->all(), $this->productUpdateRules, $this->productMessages);
         $errors = [];
@@ -304,8 +311,7 @@ class ProductController extends Controller
         $product = Product::find($id);
 
         $product->name = $request->name;
-        $product->short_description = $request->short_description;
-        $product->long_description = $request->long_description;
+        $product->description = $request->description;
 
         if ($request->has('category_id')) {
             $product->category_id = $request->category_id;
@@ -315,14 +321,13 @@ class ProductController extends Controller
             Storage::delete("public/$product->image");
 
             $filename = time() . '_' . $request->file("image")->getClientOriginalName(); 
-            $parentPath = "images/product";  
-            $destinationPath = public_path($parentPath);
+            $parentPath = "images/product";         
             $imagePath = $request->file("image")->storeAs($parentPath, $filename, 'public');
-            $category->image = $imagePath;   
+            $product->image = $imagePath;   
         }
 
         if ($request->hasFile('gallery')) {
-            foreach(explode("|", $category->gallery) as $file) {
+            foreach(explode("|", $product->gallery) as $file) {
                 Storage::delete("public/$file");
             }
 
@@ -333,8 +338,8 @@ class ProductController extends Controller
                 }
                 $filename = time() . '_' . $image->getClientOriginalName();
                 $parentPath = "images/product/gallery";
-                $destinationPath = public_path($parentPath);
-                $imagePath = $request->file("gallery")->storeAs($parentPath, $filename, 'public');
+                
+                $imagePath = $image->storeAs($parentPath, $filename, 'public');
                 $product->gallery .= $imagePath;   
             }
         }
