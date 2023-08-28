@@ -5,7 +5,10 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\Coupon;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class CouponController extends Controller
 {
@@ -69,7 +72,7 @@ class CouponController extends Controller
                 'name' => 'bail|required|unique:coupons|regex:/^([\p{L}0-9#&\-_ ]{2,100})$/u',
                 'code' => 'bail|required|unique:coupons|regex:/^[0-9a-zA-Z\-]{5,50}$/',
                 'type_coupon' => ['bail', 'required', 'regex:/^(shipping|totalcart|onproduct)$/'],
-                'value' => 'required',
+                'value' => ['bail', 'required', ' numeric', 'min:0'],
                 'type_value' => [
                     'bail', 'required', 'regex:/^(reduce_shipping|free_shipping|number_value|percent_value)$/'
                 ],
@@ -83,9 +86,15 @@ class CouponController extends Controller
                 'type_coupon.required' => 'Loại coupon không được để trống.',
                 'type_coupon.regex' => 'Loại coupon không đúng.',
                 'value.required' => 'Giá trị coupon không được để trống.',
+                'value.numeric' => 'Giá trị coupon phải là số.',
+                'value.min' => 'Giá trị coupon phải là số lớn hơn hoặc bằng 0.',
+                'value.max' => 'Không thể vượt quá 100%.',
                 'type_value.required' => 'Loại giá trị không được để trống.',
                 'type_value.regex' => 'Loại giá trị không đúng.',
             ]);
+            $validator->sometimes('value', 'required|numeric|min:0|max:100', function ($input) {
+                return $input->type_value === 'percent_value';
+            });
             if ($validator->fails()) {
                 return response()->json([
                     'status' => 'error', 'message' => implode(PHP_EOL, $validator->errors()->all())
@@ -99,6 +108,7 @@ class CouponController extends Controller
                 'value' => $data['value'],
                 'type_value' => $data['type_value'],
             ]);
+            $coupon->product_id = $data['product_id'] ?? null;
             $coupon->limit_time = $data['limit_time'] ?? null; //isset($data['key']) ? $data['key'] : null;
             $coupon->date_start = $data['date_start'] ?? null;
             $coupon->date_end = $data['date_end'] ?? null;
@@ -173,4 +183,125 @@ class CouponController extends Controller
             ]);
         }
     }
+
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+    public function updateCoupon(Request $request, $id): \Illuminate\Http\JsonResponse
+    {
+        // Check permission
+        if (!auth()->user()->can('Edit Coupon')) {
+            return response()->json(['status' => 'error', 'message' => 'Bạn không có quyền truy cập chức năng.']);
+        }
+
+        $data = $request->all();
+
+        $coupon = Coupon::find($id);
+        if ($coupon) {
+            try {
+                $validator = Validator::make($data, [
+                    'name' => [
+                        'bail', 'required', 'regex:/^([\p{L}0-9#&\-_ ]{2,100})$/u',
+                        Rule::unique('coupons')->ignore($coupon->id)
+                    ],
+                    'code' => [
+                        'bail', 'required', 'regex:/^[0-9a-zA-Z\-]{5,50}$/',
+                        Rule::unique('coupons')->ignore($coupon->id)
+                    ],
+                    'type_coupon' => ['bail', 'required', 'regex:/^(shipping|totalcart|onproduct)$/'],
+                    'value' => ['bail', 'required', ' numeric', 'min:0'],
+                    'type_value' => [
+                        'bail', 'required', 'regex:/^(reduce_shipping|free_shipping|number_value|percent_value)$/'
+                    ],
+                ], [
+                    'name.required' => 'Tên không được để trống.',
+                    'name.regex' => 'Tên không đúng định dạng. Độ dài 2-100 ký tự gồm chữ và số',
+                    'name.unique' => 'Tên đã tồn tại.',
+                    'code.required' => 'Code không được để trống.',
+                    'code.unique' => 'Code đã tồn tại.',
+                    'code.regex' => 'Code không đúng định dạng.Độ dài 5-50 ký tự gồm chữ và số',
+                    'type_coupon.required' => 'Loại coupon không được để trống.',
+                    'type_coupon.regex' => 'Loại coupon không đúng.',
+                    'value.required' => 'Giá trị coupon không được để trống.',
+                    'value.numeric' => 'Giá trị coupon phải là số.',
+                    'value.min' => 'Giá trị coupon phải là số lớn hơn hoặc bằng 0.',
+                    'value.max' => 'Giá trị coupon phải là số nhỏ hơn hoặc bằng 100.',
+                    'type_value.required' => 'Loại giá trị không được để trống.',
+                    'type_value.regex' => 'Loại giá trị không đúng.',
+                ]);
+                $validator->sometimes('value', 'required|numeric|min:0|max:100', function ($input) {
+                    return $input->type_value === 'percent_value';
+                });
+                if ($validator->fails()) {
+                    return response()->json([
+                        'status' => 'error', 'message' => implode(PHP_EOL, $validator->errors()->all())
+                    ]);
+                }
+                $coupon->name = $data['name'];
+                $coupon->code = $data['code'];
+                $coupon->type_coupon = $data['type_coupon'];
+                $coupon->value = $data['value'];
+                $coupon->type_value = $data['type_value'];
+                $coupon->limit_time = $data['limit_time'] ?? null; //isset($data['key']) ? $data['key'] : null;
+                $coupon->date_start = $data['date_start'] ?? null;
+                $coupon->date_end = $data['date_end'] ?? null;
+                $coupon->status = $data['status'] ?? 'active';
+                $coupon->coupon_requests = $data['coupon_requests'] ?? null;
+                $coupon->save();
+
+                return response()->json(['status' => 'ok', 'message' => 'Cập nhật coupon thành công!']);
+
+            } catch (\Exception $e) {
+                return response()->json(['status' => 'error', 'message' => substr($e->getMessage(), 0, 150)]);
+            }
+        } else {
+            return response()->json(['status' => 'error', 'message' => 'Không tìm thấy dữ liệu!']);
+        }
+    }
+
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+
+    public function getValueByCode($code): \Illuminate\Http\JsonResponse
+    {
+        $coupon = Coupon::where('code', $code)->first();
+        $user = Auth::user();
+
+        if (!$coupon) {
+            return response()->json(['status' => 'error', 'message' => 'Mã giảm giá không tồn tại']);
+        }
+        if ($coupon->status === "disable") {
+            return response()->json(['status' => 'error', 'message' => 'Mã giảm giá đã bị vô hiệu hoá']);
+        }
+        if ($coupon->limit_time === 0) {
+            return response()->json(['status' => 'error', 'message' => 'Mã giảm giá này đã hết lượt sử dụng']);
+        }
+        $startDate = Carbon::parse($coupon->date_start);
+        if ($startDate->isFuture()) {
+            return response()->json(['status' => 'error', 'message' => 'Mã giảm giá không tồn tại']);
+        }
+        $endDate = Carbon::parse($coupon->date_end);
+        if ($endDate->isPast()) {
+            return response()->json(['status' => 'error', 'message' => 'Mã giảm giá đã hết hạn']);
+        }
+        if (!$user && ($coupon->coupon_requests['forRole'] || $coupon->coupon_requests['forUser'])) {
+            return response()->json(['status' => 'error', 'message' => 'Bạn cần đăng nhập để sủ dụng mã này']);
+        }
+        if ($user && $coupon->coupon_requests['forUser'] && $user->email !== $coupon->coupon_requests['forUser']) {
+            return response()->json(['status' => 'error', 'message' => 'Mã giảm giá không dùng cho bạn']);
+        }
+        if ($user && $coupon->coupon_requests['forRole'] && $user->getRoleNames() !== $coupon->coupon_requests['forRole']) {
+            return response()->json(['status' => 'error', 'message' => 'Mã giảm giá này chỉ dùng cho nhóm chỉ định']);
+        }
+
+
+        return response()->json(['status' => 'ok', 'message' => 'Thêm mã giảm giá thành công', 'data' => $coupon]);
+    }
+
+
+
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//
 }

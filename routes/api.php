@@ -67,9 +67,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('getListCoupon', [CouponController::class, 'getListCoupon']);
     Route::put('changeStatusCoupon/{id}', [CouponController::class, 'changeStatusCoupon']);
     Route::post('deleteCoupon', [CouponController::class, 'deleteCoupon']);
+    Route::put('updateCoupon/{id}', [CouponController::class, 'updateCoupon']);
+    Route::get('getValueByCode/{code}', [CouponController::class, 'getValueByCode']);
 //
 //    Manager ListAddress
     Route::post('createAddress', [ListAddressController::class, 'createAddress']);
     Route::get('showListAddressOfUser', [ListAddressController::class, 'showListAddressOfUser']);
     Route::get('getOneAddressOfUserByID/{id}', [ListAddressController::class, 'getOneAddressOfUserByID']);
+    Route::put('editAddressByID/{id}', [ListAddressController::class, 'editAddressByID']);
 });
