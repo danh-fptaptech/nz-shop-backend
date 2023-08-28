@@ -5,7 +5,10 @@ use App\Http\Controllers\CouponController;
 use App\Http\Controllers\ListAddressController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
-use App\Http\Middleware\VerifyApiKey;
+use App\Http\Controllers\Product\ProductController;
+use App\Http\Controllers\Product\CategoryController;
+use App\Http\Controllers\Product\ProductVariantController;
+
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -18,6 +21,7 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
+
 Route::post('register', [AuthController::class, 'register']);
 Route::post('verify-email', [AuthController::class, 'verify'])->name('verification.verify');
 Route::post('login', [AuthController::class, 'login']);
@@ -32,7 +36,7 @@ Route::middleware('auth:api')->get('isAdmin', [AuthController::class, 'isAdmin']
 //});
 
 Route::middleware('auth:sanctum')->group(function () {
-//  User Controller
+    //  User Controller
     Route::get('logout', [AuthController::class, 'logout']);
     Route::get('reSentVerify', [AuthController::class, 'reSentVerify']);
     Route::post('createUser', [AuthController::class, 'createUser']);
@@ -41,7 +45,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('users/{id}', [AuthController::class, 'infoUserID']);
     Route::post('searchUsers', [UserController::class, 'getListUserByQuery']);
 
-//  Role Controller
+    //  Role Controller
     Route::post('createRole', [RoleController::class, 'createRole']);
     Route::post('createRoleWithPermissions', [RoleController::class, 'createRoleWithPermissions']);
     Route::post('deleteRole', [RoleController::class, 'deleteRole']);
@@ -51,17 +55,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('setPermission', [RoleController::class, 'setPermission']);
     Route::get('listRoles', [RoleController::class, 'listRoles']);
     Route::get('listPermissions', [RoleController::class, 'listPermissions']);
-//    Route::post('assignRole', [RoleController::class, 'assignRole']);
-//    Route::post('removeRole', [RoleController::class, 'removeRole']);
-//    Route::post('setRole', [RoleController::class, 'setRole']);
-//    Route::post('unsetRole', [RoleController::class, 'unsetRole']);
+    //    Route::post('assignRole', [RoleController::class, 'assignRole']);
+    //    Route::post('removeRole', [RoleController::class, 'removeRole']);
+    //    Route::post('setRole', [RoleController::class, 'setRole']);
+    //    Route::post('unsetRole', [RoleController::class, 'unsetRole']);
 
-//    Statistics
+    //    Statistics
 
     Route::get('userStats', [UserController::class, 'userStats']);
     Route::get('getListUser', [UserController::class, 'getListUser']);
 
-//    Manager Coupon
+    //    Manager Coupon
     Route::post('createCoupon', [CouponController::class, 'createCoupon']);
     Route::get('generateUniqueCode', [CouponController::class, 'generateUniqueCode']);
     Route::get('getListCoupon', [CouponController::class, 'getListCoupon']);
@@ -69,10 +73,35 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('deleteCoupon', [CouponController::class, 'deleteCoupon']);
     Route::put('updateCoupon/{id}', [CouponController::class, 'updateCoupon']);
     Route::get('getValueByCode/{code}', [CouponController::class, 'getValueByCode']);
-//
-//    Manager ListAddress
+    //
+    //    Manager ListAddress
     Route::post('createAddress', [ListAddressController::class, 'createAddress']);
     Route::get('showListAddressOfUser', [ListAddressController::class, 'showListAddressOfUser']);
     Route::get('getOneAddressOfUserByID/{id}', [ListAddressController::class, 'getOneAddressOfUserByID']);
     Route::put('editAddressByID/{id}', [ListAddressController::class, 'editAddressByID']);
 });
+// Long 
+Route::get("/products", [ProductController::class, "getAllProducts"]);
+Route::post("/products", [ProductController::class, "createOneProduct"]);
+Route::put("/products/delete/{id}", [ProductController::class, "deleteOneProduct"]);
+Route::put("/products/recover/{id}", [ProductController::class, "recoverOneProduct"]);
+Route::get("/products/{id}/variants", [ProductController::class, "getAllVariantsByProductId"]);
+Route::get("/products/{id}/variant", [ProductController::class, "getLowPriceVariantByProductId"]);
+Route::get("/products/{slug}", [ProductController::class, "getOneProductBySlug"]);
+Route::put("/products/update/{id}", [ProductController::class, "updateOneProduct"]);
+
+Route::get("/categories", [CategoryController::class, "getAllCategories"]);
+Route::post("/categories", [CategoryController::class, "createOneCategory"]);
+Route::put("/categories/delete/{id}", [CategoryController::class, "deleteOneCategory"]);
+Route::put("/categories/delete-recursively/{id}", [CategoryController::class, "deleteRecursiveCategories"]);
+Route::put("/categories/recover/{id}", [CategoryController::class, "recoverOneCategory"]);
+Route::put("/categories/recover-recursively/{id}", [CategoryController::class, "recoverRecursiveCategories"]);
+Route::get("/categories/{id}", [CategoryController::class, "getSubCategories"]);
+Route::put("/categories/update/{id}", [CategoryController::class, "updateOneCategory"]);
+Route::get("/recursive-categories/{id}/products/{numbers?}", [CategoryController::class, "getProductsByRecursiveCategoryId"]);
+Route::get("/recursive-categories/{id}", [CategoryController::class, "getRecursiveCategories"]);
+
+Route::put("/variants/delete/{id}", [ProductVariantController::class, "deleteOneVariant"]);
+Route::put("/variants/recover/{id}", [ProductVariantController::class, "recoverOneVariant"]);
+Route::put("/variants/force-recover/{id}", [ProductVariantController::class, "forceRecoverOneVariant"]);
+Route::put("/variants/update/{id}", [ProductVariantController::class, "updateOneVariant"]);
