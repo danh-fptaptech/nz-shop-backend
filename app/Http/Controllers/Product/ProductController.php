@@ -21,7 +21,7 @@ class ProductController extends Controller
     ];
 
     private $productUpdateRules = [
-        "name" => "bail|required|string|min:3|max:25",
+        "name" => "bail|required|string|min:3|max:50",
         "image" => "bail|mimes:jpeg,jpg,png,gif,bmp,webp,svg|max:2048",
         'gallery.*' => 'bail|mimes:jpeg,jpg,png,gif,bmp,webp,svg|max:2048',
         "description" => "bail|required|string",

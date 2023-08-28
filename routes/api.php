@@ -12,7 +12,10 @@ use App\Http\Controllers\Comment\PostCommentController;
 use App\Http\Controllers\Comment\ProductCommentController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\Review\ReviewController;
+use App\Http\Controllers\PageController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\SliderController;
 
 /*
 |--------------------------------------------------------------------------
@@ -139,3 +142,26 @@ Route::get("/product-comments/{id}/product-feedbacks", [ProductCommentController
 Route::get("/products", [ProductController::class, "getAllProducts"]);
 Route::get("/products/{id}/comments", [ProductController::class, "getAllComments"]);
 Route::get("/products/{id}/reviews", [ProductController::class, "getAllReviews"]);
+
+Route::post("/description", [DescriptionController::class, "storeImageUpload"]);
+
+
+Route::get("/posts", [PostController::class, "index"]);
+Route::post("/posts", [PostController::class, "store"]);
+Route::get("/posts/{id}", [PostController::class, "getOnePost"]);
+Route::get("/posts/{title}", [PostController::class, "getPost"]);
+Route::put("/posts/edit/{id}", [PostController::class, "update"]);
+Route::delete("/posts/delete/{id}", [PostController::class, "delete"]);
+Route::get("/randomPosts", [PostController::class, "randomPost"]);
+
+Route::get("/pages", [PageController::class, "index"]);
+Route::post("/pages", [PageController::class, "store"]);
+Route::get("/pages/{id}", [PageController::class, "getOnePage"]);
+Route::put("/pages/edit/{id}", [PageController::class, "update"]);
+Route::delete("/pages/delete/{id}", [PageController::class, "delete"]);
+
+Route::get("/sliders", [SliderController::class, "index"]);
+Route::post("/sliders", [SliderController::class, "store"]);
+Route::get("/sliders/{id}", [SliderController::class, "getOneSlider"]);
+Route::put("/sliders/edit/{id}", [SliderController::class, "update"]);
+Route::delete("/sliders/delete/{id}", [SliderController::class, "delete"]);

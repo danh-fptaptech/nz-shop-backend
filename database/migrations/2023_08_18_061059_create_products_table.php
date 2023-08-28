@@ -18,7 +18,8 @@ return new class extends Migration
             $table->string('slug');
             $table->string('image');
             $table->text('gallery');
-            $table->text('description');
+            $table->text('short_description');
+            $table->text('long_description');
             $table->boolean('is_deleted')->default(false);
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
