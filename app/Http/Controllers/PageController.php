@@ -35,7 +35,6 @@ class PageController extends Controller
 			"author" => "required",
 			"content" => "bail|required|max:10000",
 		]);
-
 		if ($validator->fails()) {
 			return response()->json([
 				"status" => 400,

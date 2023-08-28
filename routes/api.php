@@ -6,6 +6,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\SliderController;
+use App\Http\Controllers\Product\ProductController;
+use App\Http\Controllers\Product\ProductVariantController;
+use App\Http\Controllers\Product\CategoryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,7 +28,9 @@ Route::get("/products", [ProductController::class, "getAllProducts"]);
 Route::post("/products", [ProductController::class, "createOneProduct"]);
 Route::put("/products/delete/{id}", [ProductController::class, "deleteOneProduct"]);
 Route::put("/products/recover/{id}", [ProductController::class, "recoverOneProduct"]);
-Route::get("/products/{id}", [ProductController::class, "getProductVariant"]);
+Route::get("/products/{id}/variants", [ProductController::class, "getAllVariantsByProductId"]);
+Route::get("/products/{id}/variant", [ProductController::class, "getLowPriceVariantByProductId"]);
+Route::get("/products/{slug}", [ProductController::class, "getOneProductBySlug"]);
 Route::put("/products/update/{id}", [ProductController::class, "updateOneProduct"]);
 
 Route::get("/categories", [CategoryController::class, "getAllCategories"]);
@@ -36,6 +41,8 @@ Route::put("/categories/recover/{id}", [CategoryController::class, "recoverOneCa
 Route::put("/categories/recover-recursively/{id}", [CategoryController::class, "recoverRecursiveCategories"]);
 Route::get("/categories/{id}", [CategoryController::class, "getSubCategories"]);
 Route::put("/categories/update/{id}", [CategoryController::class, "updateOneCategory"]);
+Route::get("/recursive-categories/{id}/products", [CategoryController::class, "getProductsByRecursiveCategoryId"]);
+Route::get("/recursive-categories/{id}", [CategoryController::class, "getRecursiveCategories"]);
 
 Route::put("/variants/delete/{id}", [ProductVariantController::class, "deleteOneVariant"]);
 Route::put("/variants/recover/{id}", [ProductVariantController::class, "recoverOneVariant"]);

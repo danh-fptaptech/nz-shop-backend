@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Collection;
 
 class CategoryController extends Controller
 {
@@ -293,5 +294,30 @@ class CategoryController extends Controller
             ], 
             200
         );
+    }
+
+    public function getProductsByRecursiveCategoryId($id) {
+        $firstCategoryArray = Category::find($id);
+        $categories = $this->getRecursiveCategories($id)->push($firstCategoryArray);
+        $products = new Collection;
+        foreach ($categories as $category) {
+            $products = $products->merge($category->products);
+        }
+        if ($products->count() >= 8) {
+            $products = $products->random(8);
+        }
+        return response()->json([
+            "data" =>  $products,
+            "message" => "Get successfully!"
+        ], 200);
+    }
+
+    public function getRecursiveCategories($id, &$result = new Collection) {
+        $categories = Category::where("parent_category_id", $id)->get();
+        $result = $result->merge($categories);
+        foreach ($categories as $category) {
+            $this->getRecursiveCategories($category->id, $result);
+        }
+        return $result;
     }
 }
