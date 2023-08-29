@@ -4,7 +4,8 @@ use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\RoleController;
 use App\Http\Controllers\Product\ProductController;
 use App\Http\Controllers\Product\CategoryController;
-use App\Http\Controllers\Product\ProductVariantController;
+use App\Http\Controllers\Product\ProductVariantController; 
+use App\Http\Controllers\Description\DescriptionController; 
 
 use Illuminate\Support\Facades\Route;
 
@@ -45,6 +46,8 @@ Route::put("/variants/delete/{id}", [ProductVariantController::class, "deleteOne
 Route::put("/variants/recover/{id}", [ProductVariantController::class, "recoverOneVariant"]);
 Route::put("/variants/force-recover/{id}", [ProductVariantController::class, "forceRecoverOneVariant"]);
 Route::put("/variants/update/{id}", [ProductVariantController::class, "updateOneVariant"]);
+
+Route::post("/description", [DescriptionController::class, "storeImageUpload"]);
 //Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 //    return $request->user();
 //});

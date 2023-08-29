@@ -178,7 +178,6 @@ class ProductController extends Controller
                 $item = (array) $item;
                 $validator = Validator::make($item, $this->variantRules, $this->variantMessages);
 
-                error_log(print_r($validator->validated(), true));
                 if ($validator->fails()) {
                     $isValid = false;
                 }
@@ -212,7 +211,7 @@ class ProductController extends Controller
 
     public function deleteOneProduct($id) {
         $product = Product::find($id);
-        $variants = Product::find($id)->product_variants;
+        $variants = $product->product_variants;
         
         $product->is_deleted = true;
         foreach ($variants as $variant) {
@@ -232,7 +231,7 @@ class ProductController extends Controller
 
     public function recoverOneProduct($id) {
         $product = Product::find($id);
-        $variants = Product::find($id)->product_variants;
+        $variants = $product->product_variants;
         
         $product->is_deleted = false;
         foreach ($variants as $variant) {
@@ -355,7 +354,6 @@ class ProductController extends Controller
     }
 
     public function getOneProductBySlug($slug) {
-        error_log($slug);
         $product = Product::where('slug', 'like', $slug)->first();
         return response()->json(["data" => $product], 200);
     }
