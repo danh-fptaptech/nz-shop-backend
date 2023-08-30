@@ -100,6 +100,8 @@ Route::get("/products/{id}/variants", [ProductController::class, "getAllVariants
 Route::get("/products/{id}/variant", [ProductController::class, "getLowPriceVariantByProductId"]);
 Route::get("/products/{slug}", [ProductController::class, "getOneProductBySlug"]);
 Route::put("/products/update/{id}", [ProductController::class, "updateOneProduct"]);
+Route::get("/products/{id}/comments", [ProductController::class, "getAllComments"]);
+// Route::get("/products/{id}/reviews", [ProductController::class, "getAllReviews"]);
 
 Route::get("/categories", [CategoryController::class, "getAllCategories"]);
 Route::post("/categories", [CategoryController::class, "createOneCategory"]);
@@ -112,6 +114,7 @@ Route::put("/categories/update/{id}", [CategoryController::class, "updateOneCate
 Route::get("/recursive-categories/{id}/products/{numbers?}", [CategoryController::class, "getProductsByRecursiveCategoryId"]);
 Route::get("/recursive-categories/{id}", [CategoryController::class, "getRecursiveCategories"]);
 
+Route::get("/variants/{id}", [ProductVariantController::class, "getOneVariantById"]);
 Route::put("/variants/delete/{id}", [ProductVariantController::class, "deleteOneVariant"]);
 Route::put("/variants/recover/{id}", [ProductVariantController::class, "recoverOneVariant"]);
 Route::put("/variants/force-recover/{id}", [ProductVariantController::class, "forceRecoverOneVariant"]);
@@ -126,9 +129,8 @@ Route::get("/post-comments/{id}/post-feedbacks", [PostCommentController::class, 
 
 Route::get("/users", [UserController::class, "getAllUsers"]);
 
-Route::get("/posts", [PostController::class, "getAllPosts"]);
+// Route::get("/posts", [PostController::class, "getAllPosts"]);
 Route::get("/posts/{id}/comments", [PostController::class, "getAllComments"]);
-
 
 Route::get("/reviews", [ReviewController::class, "getAllReviews"]);
 Route::post("/reviews", [ReviewController::class, "createOneReview"]);
@@ -140,10 +142,6 @@ Route::post("/product-comments", [ProductCommentController::class, "createOneCom
 Route::put("/product-comments/approve/{id}", [ProductCommentController::class, "approveOneCommentProduct"]);
 Route::put("/product-comments/delete/{id}", [ProductCommentController::class, "deleteOneCommentProduct"]);
 Route::get("/product-comments/{id}/product-feedbacks", [ProductCommentController::class, "getAllProductFeedBacksById"]);
-
-Route::get("/products", [ProductController::class, "getAllProducts"]);
-Route::get("/products/{id}/comments", [ProductController::class, "getAllComments"]);
-Route::get("/products/{id}/reviews", [ProductController::class, "getAllReviews"]);
 
 Route::post("/description", [DescriptionController::class, "storeImageUpload"]);
 

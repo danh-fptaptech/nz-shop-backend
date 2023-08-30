@@ -14,7 +14,7 @@ class ProductVariantController extends Controller
               'quantity' => 'bail|required|integer',
               'origin_price' => 'bail|required|numeric|min:1000',
               'sell_price' => 'bail|required|numeric|min:1000',
-              'discount_price' => 'bail|numeric|min:1000',
+              'discount_price' => 'bail|numeric|nullable|min:1000',
           ];
 
   private $messages = [
@@ -108,5 +108,11 @@ class ProductVariantController extends Controller
       ],
       201
     );
+  }
+
+  public function getOneVariantById($id) {
+    $variant = Product_variant::find($id);
+
+    return response()->json(["data" => $variant], 200);
   }
 }

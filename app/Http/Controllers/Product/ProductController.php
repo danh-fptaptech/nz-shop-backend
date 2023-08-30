@@ -44,7 +44,7 @@ class ProductController extends Controller
         'quantity' => 'bail|required|integer',
         'origin_price' => 'bail|required|numeric|min:1000',
         'sell_price' => 'bail|required|numeric|min:1000',
-        'discount_price' => 'bail|numeric|min:1000',
+        'discount_price' => 'bail|numeric|nullable|min:1000',
     ];
 
     private $variantMessages = [
@@ -54,28 +54,14 @@ class ProductController extends Controller
         "min" => "Giá phải lớn hơn hoặc bằng 1000 VND",
     ];
 
-    private function serverError($data)
-    {
-        return response()->json(
-            [
-                "data" => $data,
-                "message" => "Something went wrong!!"
-            ],
-            500
-        );
-    }
 
     public function getAllProducts()
     {
         $products = Product::all();
-        if (!$products) {
-            return $this->serverError("Get all products");
-        }
 
         if ($products->count() > 0) {
             return response()->json(
                 [
-                    "status" => 200,
                     "data" => $products,
                     "message" => "Get all products successfully!"
                 ],
@@ -133,24 +119,20 @@ class ProductController extends Controller
         }
 
         $product->save();
-
-        if ($product) {
-            $response = $this->createVariantsByProductId($product->id);
-            DB::commit();
-            if ($response) {
-                return $response;
-            }
-            return response()->json(
-                [
-                    "status" => 201,
-                    "data" => $product,
-                    "message" => "Create a product successfully!"
-                ],
-                201
-            );
+ 
+        $response = $this->createVariantsByProductId($product->id);
+        DB::commit();
+        if ($response) {
+            return $response;
         }
-
-        return $this->serverError("Create a product");
+        return response()->json(
+            [
+                "status" => 201,
+                "data" => $product,
+                "message" => "Create a product successfully!"
+            ],
+            201
+        );
     }
 
     public function createVariantsByProductId($productId)
@@ -209,7 +191,7 @@ class ProductController extends Controller
 
         if ($variants->count() === 0) {
             DB::rollback();
-            return $this->serverError("Create variants");
+            return response()->json([], 500);
         }
     }
 
@@ -410,6 +392,7 @@ class ProductController extends Controller
         $string = strtolower($string);
         return $string;
     }
+
     public function getAllComments($id)
     {
         $comments = Product::find($id)->comments;
