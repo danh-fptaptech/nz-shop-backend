@@ -3,7 +3,6 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -12,15 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('product_variants', function (Blueprint $table) {
+        Schema::create('post_comments', function (Blueprint $table) {
             $table->id();
-            $table->string('value')->nullable();
-            $table->string('sku');
-            $table->integer("quantity");
-            $table->bigInteger('origin_price');
-            $table->bigInteger('sell_price');
-            $table->bigInteger('discount_price')->nullable();
-            $table->boolean('is_deleted')->default(false);
+            $table->text("comment");  
+            $table->enum('status', ['pending', 'approved', 'deleted'])->default('pending');       
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
         });
@@ -31,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('product_variants');
+        Schema::dropIfExists('post_comments');
     }
 };

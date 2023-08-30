@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\API;
+namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -61,14 +61,13 @@ class RoleController extends Controller
         try {
             // Check permission
             if (!auth()->user()->can('Edit Role')) {
-                return response()->json([
-                    'error' => 'Bạn không có quyền thực hiện thao tác này.'
-                ], 403);
+                return response()->json(['status' => 'error', 'message' => 'Bạn không có quyền truy cập chức năng.']);
             }
             $role = Role::findById($id);
             $newName = $request->input('role_name');
             if ($newName === $role->name) {
-                return response()->json(['message' => 'Tên mới và tên cũ giống nhau, không có thay đổi.']);
+                $role->syncPermissions($request->input('permissions'));
+                return response()->json(['status' => 'ok', 'message' => 'Cập nhật thành công']);
             } else {
                 $validator = Validator::make($request->all(), [
                     'role_name' => 'bail|required|regex:/([\p{L}0-9 ]+)$/u|min:2|max:20|unique:roles,name'
@@ -82,20 +81,21 @@ class RoleController extends Controller
                 // Check validator
                 if ($validator->fails()) {
                     return response()->json([
-                        'error' => 'Dữ liệu không hợp lệ',
-                        'errors' => $validator->errors()
-                    ], 400);
+                        'status' => 'error', 'message' => implode(PHP_EOL, $validator->errors()->all())
+                    ]);
                 }
                 // Action
-                $role->name = $newName;
-                $role->save();
-                return response()->json(['message' => 'Update Role thành công.']);
+                if (in_array($id, [1, 2, 3,4])) {
+                    return response()->json(['status' => 'error', 'message' => 'Vai trò mặc định không thể sửa tên.']);
+                } else {
+                    $role->name = $newName;
+                    $role->save();
+                    $role->syncPermissions($request->input('permissions'));
+                    return response()->json(['status' => 'ok', 'message' => 'Cập nhật thành công']);
+                }
             }
         } catch (\Exception $e) {
-            return response()->json([
-                'error' => $e->getMessage(),
-                'message' => 'Check error - RoleController.updateRole'
-            ]);
+            return response()->json(['status' => 'error', 'message' => substr($e->getMessage(), 0, 150)]);
         }
     }
 
@@ -108,9 +108,10 @@ class RoleController extends Controller
             // Check permission
             if (!auth()->user()->can('Delete Role')) {
                 return response()->json([
-                    'error' => 'Bạn không có quyền thực hiện thao tác này.'
-                ], 403);
+                    'status' => 'error', 'message' => 'Bạn không có quyền truy cập chức năng này.'
+                ]);
             }
+            // Check validator
             $validator = Validator::make($request->all(), [
                 'role_id' => 'required|numeric|exists:roles,id',
             ], [
@@ -118,21 +119,30 @@ class RoleController extends Controller
                 'role_id.numeric' => 'Sai kiểu dữ liệu',
                 'role_id.exists' => 'Dữ liệu không tồn tại'
             ]);
-            // Check validator
             if ($validator->fails()) {
                 return response()->json([
-                    'error' => 'Dữ liệu không hợp lệ',
-                    'errors' => $validator->errors()
-                ], 400);
+                    'status' => 'error', 'message' => implode(PHP_EOL, $validator->errors()->all())
+                ]);
             }
             // Action
-            $role = Role::findById($request->input('role_id'));
-            $role->delete();
-            return response()->json(['message' => 'Delete Role thành công.']);
+            if (in_array($request->input('role_id'), [1, 2, 3, 4])) {
+                return response()->json(['status' => 'error', 'message' => 'Vai trò hệ thống không thể xoá']);
+            } else {
+                $role = Role::findById($request->input('role_id'));
+                if (!empty($role->users()->first())) {
+                    return response()->json([
+                        'status' => 'error', 'message' => 'Vai trò đang có tài khoản không thể xoá'
+                    ]);
+                } else {
+
+                    $role->delete();
+                    return response()->json(['status' => 'ok', 'message' => 'Xoá vai trò thành công']);
+                }
+            }
         } catch (\Exception $e) {
             return response()->json([
-                'error' => $e->getMessage(),
-                'message' => 'Check error - RoleController.deleteRole'
+                'status' => 'error',
+                'message' => substr($e->getMessage(), 0, 150)
             ]);
         }
     }
@@ -230,8 +240,7 @@ class RoleController extends Controller
             //Validator
             $validator = Validator::make($request->all(), [
                 'role_id' => 'required|numeric|exists:roles,id',
-                'user_id' => 'required|numeric|exists:users,id',
-                'isSet' => 'required|Boolean'
+                'user_id' => 'required|numeric|exists:users,id'
             ]);
 
             if ($validator->fails()) {
@@ -243,11 +252,7 @@ class RoleController extends Controller
 
             $role = Role::findById($request->input('role_id'));
             $user = User::find($request->input('user_id'));
-            if ($request->input('isSet')) {
-                $user->assignRole($role);
-            } else {
-                $user->removeRole($role);
-            }
+            $user->syncRoles($role);
             return response()->json(['message' => 'Update User role success.']);
         } catch (\Exception $e) {
             return response()->json([
@@ -257,6 +262,73 @@ class RoleController extends Controller
         }
     }
 
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//
 
+    public function listRoles(): \Illuminate\Http\JsonResponse
+    {
+        $roles = Role::with(['permissions', 'users'])->orderBy('id')->get();
+        $formattedRoles = $roles->map(function ($role) {
+            return [
+                "id" => $role->id,
+                "name" => $role->name,
+                "permissions" => $role->permissions->pluck('name'),
+                "totalUser" => $role->users->count()
+            ];
+        });
+        return response()->json($formattedRoles);
+    }
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+
+    public function listPermissions(): \Illuminate\Http\JsonResponse
+    {
+        $permissions = Permission::pluck('name');
+        return response()->json($permissions);
+    }
+
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+    public function createRoleWithPermissions(Request $request): \Illuminate\Http\JsonResponse
+    {
+        try {
+            // Check permission
+
+            if (!auth()->user()->can('Create Role')) {
+                return response()->json(['status' => 'error', 'message' => 'Bạn không có quyền truy cập chức năng.']);
+            }
+            //  Check validator
+            $validator = Validator::make($request->all(), [
+                'role_name' => 'bail|required|regex:/([\p{L}0-9 ]+)$/u|min:2|max:20|unique:roles,name'
+            ], [
+                'role_name.required' => 'Vui lòng nhập tên Role',
+                'role_name.regex' => 'Tên Role phải là chữ hoặc số',
+                'role_name.min' => 'Tên Role phải dài hơn 2 ký tự',
+                'role_name.max' => 'Tên Role không vượt quá 20 ký tự',
+                'role_name.unique' => 'Role này đã tồn tại'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => 'error', 'message' => implode(PHP_EOL, $validator->errors()->all())
+                ]);
+            }
+
+            // Tạo mới Role
+            $role = Role::create(['name' => $request->input('role_name')]);
+
+            $role->syncPermissions($request->input('permissions'));
+            return response()->json(['status' => 'ok', 'message' => 'Tạo Vai trò thành công']);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => substr($e->getMessage(), 0, 150)]);
+        }
+    }
+
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//
 //End File
 }
