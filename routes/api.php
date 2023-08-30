@@ -89,7 +89,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('getOneAddressOfUserByID/{id}', [ListAddressController::class, 'getOneAddressOfUserByID']);
     Route::put('editAddressByID/{id}', [ListAddressController::class, 'editAddressByID']);
 });
-// Long 
+// Long
 Route::post("/description", [DescriptionController::class, "storeImageUpload"]);
 
 Route::get("/products", [ProductController::class, "getAllProducts"]);
@@ -117,7 +117,7 @@ Route::put("/variants/recover/{id}", [ProductVariantController::class, "recoverO
 Route::put("/variants/force-recover/{id}", [ProductVariantController::class, "forceRecoverOneVariant"]);
 Route::put("/variants/update/{id}", [ProductVariantController::class, "updateOneVariant"]);
 
-//Tam 
+//Tam
 Route::get("/post-comments", [PostCommentController::class, "getAllComments"]);
 Route::post("/post-comments", [PostCommentController::class, "createOneComment"]);
 Route::put("/post-comments/approve/{id}", [PostCommentController::class, "approveOneComment"]);

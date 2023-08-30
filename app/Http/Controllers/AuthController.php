@@ -240,11 +240,11 @@ class AuthController extends Controller
     {
         $user = Auth::user();
         if ($user) {
-            return (Auth::user()->hasRole(1) || Auth::user()->hasRole(4))
-                ? response()->json(['check_value' => true])
-                : response()->json(['check_value' => false]);
+            return (Auth::user()->hasRole(1))
+                ? response()->json(['isAdmin' => true])
+                : response()->json(['isAdmin' => false]);
         } else {
-            return response()->json(['check_value' => false]);
+            return response()->json(['isAdmin' => false]);
         }
     }
 
@@ -254,11 +254,11 @@ class AuthController extends Controller
 
     public function isLogin(Request $request): \Illuminate\Http\JsonResponse
     {
-        $user = Auth::user();
+        $user = $request->user();
         if ($user) {
-            return response()->json(['check_value' => true], 200);
+            return response()->json(['isLogin' => true]);
         } else {
-            return response()->json(['check_value' => false], 401);
+            return response()->json(['isLogin' => false]);
         }
     }
 
@@ -328,7 +328,7 @@ class AuthController extends Controller
                 "email" => $user->email,
                 "role" => $user->roles->implode('name', ', '),
                 "isVerify" => $user->email_verified_at ? 'Verified' : 'Pending',
-                "isSuspended" =>$user->suspended
+                "isSuspended" => $user->suspended
             ];
 
             return response()->json($formattedUser);
@@ -400,7 +400,7 @@ class AuthController extends Controller
     {
         $user = User::find($id);
         if ($user) {
-            $user->suspended = $user->suspended === 'active'?'disable':'active';
+            $user->suspended = $user->suspended === 'active' ? 'disable' : 'active';
             $user->save();
             return response()->json(['status' => 'ok', 'message' => 'Cập nhật thành công']);
         } else {

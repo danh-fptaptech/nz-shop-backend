@@ -108,7 +108,7 @@ class CouponController extends Controller
                 'value' => $data['value'],
                 'type_value' => $data['type_value'],
             ]);
-            $coupon->product_id = $data['product_id'] ?? null;
+            $coupon->products_id = $data['products_id'] ?? null;
             $coupon->limit_time = $data['limit_time'] ?? null; //isset($data['key']) ? $data['key'] : null;
             $coupon->date_start = $data['date_start'] ?? null;
             $coupon->date_end = $data['date_end'] ?? null;

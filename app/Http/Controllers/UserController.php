@@ -70,7 +70,16 @@ class UserController extends Controller
     //////////////////////////////////////////////////////////////////////////
     //
 
-    // Tâm chèn code 
+    public function fetchUser(Request $request){
+        $user = $request->user();
+
+    }
+
+    //
+    //////////////////////////////////////////////////////////////////////////
+    //
+
+    // Tâm chèn code
 
     public function getAllUsers()
     {
