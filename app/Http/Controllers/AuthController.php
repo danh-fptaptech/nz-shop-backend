@@ -252,10 +252,9 @@ class AuthController extends Controller
 //////////////////////////////        Kiểm tra trạng thái Đăng nhập     ///////////////////////////////////
 //
 
-    public function isLogin(Request $request): \Illuminate\Http\JsonResponse
+    public function isLogin(): \Illuminate\Http\JsonResponse
     {
-        $user = $request->user();
-        if ($user) {
+        if (Auth::guard('api')->check()) {
             return response()->json(['isLogin' => true]);
         } else {
             return response()->json(['isLogin' => false]);

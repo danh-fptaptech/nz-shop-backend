@@ -266,9 +266,12 @@ class CouponController extends Controller
     public function getValueByCode($code): \Illuminate\Http\JsonResponse
     {
         $coupon = Coupon::where('code', $code)->first();
-        $user = Auth::user();
-
+        $user = Auth::guard('api')->user();
         if (!$coupon) {
+            return response()->json(['status' => 'error', 'message' => 'Mã giảm giá không tồn tại']);
+        }
+        $startDate = Carbon::parse($coupon->date_start);
+        if ($startDate->isFuture()) {
             return response()->json(['status' => 'error', 'message' => 'Mã giảm giá không tồn tại']);
         }
         if ($coupon->status === "disable") {
@@ -277,25 +280,19 @@ class CouponController extends Controller
         if ($coupon->limit_time === 0) {
             return response()->json(['status' => 'error', 'message' => 'Mã giảm giá này đã hết lượt sử dụng']);
         }
-        $startDate = Carbon::parse($coupon->date_start);
-        if ($startDate->isFuture()) {
-            return response()->json(['status' => 'error', 'message' => 'Mã giảm giá không tồn tại']);
-        }
         $endDate = Carbon::parse($coupon->date_end);
-        if ($endDate->isPast()) {
+        if (isset($coupon->date_end) && $endDate->isPast()) {
             return response()->json(['status' => 'error', 'message' => 'Mã giảm giá đã hết hạn']);
         }
-        if (!$user && ($coupon->coupon_requests['forRole'] || $coupon->coupon_requests['forUser'])) {
+        if (!$user && (isset(json_decode($coupon->coupon_requests)->forRole) || isset(json_decode($coupon->coupon_requests)->forUser))) {
             return response()->json(['status' => 'error', 'message' => 'Bạn cần đăng nhập để sủ dụng mã này']);
         }
-        if ($user && $coupon->coupon_requests['forUser'] && $user->email !== $coupon->coupon_requests['forUser']) {
+        if ($user && isset(json_decode($coupon->coupon_requests)->forUser) && $user->email !== json_decode($coupon->coupon_requests)->forUser) {
             return response()->json(['status' => 'error', 'message' => 'Mã giảm giá không dùng cho bạn']);
         }
-        if ($user && $coupon->coupon_requests['forRole'] && $user->getRoleNames() !== $coupon->coupon_requests['forRole']) {
+        if ($user && isset(json_decode($coupon->coupon_requests)->forRole) && $user->getRoleNames()[0] !== json_decode($coupon->coupon_requests)->forRole) {
             return response()->json(['status' => 'error', 'message' => 'Mã giảm giá này chỉ dùng cho nhóm chỉ định']);
         }
-
-
         return response()->json(['status' => 'ok', 'message' => 'Thêm mã giảm giá thành công', 'data' => $coupon]);
     }
 

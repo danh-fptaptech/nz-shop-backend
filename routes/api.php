@@ -36,8 +36,9 @@ Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
 Route::post('reset-password', [AuthController::class, 'resetPassword'])->name('password.reset');
 //Route::get('isAdmin', [AuthController::class, 'isAdmin']);
 
-Route::middleware('auth:api')->get('isLogin', [AuthController::class, 'isLogin']);
+Route::get('isLogin', [AuthController::class, 'isLogin']);
 Route::middleware('auth:api')->get('isAdmin', [AuthController::class, 'isAdmin']);
+Route::get('getValueByCode/{code}', [CouponController::class, 'getValueByCode']);
 
 
 //Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
@@ -81,7 +82,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('changeStatusCoupon/{id}', [CouponController::class, 'changeStatusCoupon']);
     Route::post('deleteCoupon', [CouponController::class, 'deleteCoupon']);
     Route::put('updateCoupon/{id}', [CouponController::class, 'updateCoupon']);
-    Route::get('getValueByCode/{code}', [CouponController::class, 'getValueByCode']);
     //
     //    Manager ListAddress
     Route::post('createAddress', [ListAddressController::class, 'createAddress']);
