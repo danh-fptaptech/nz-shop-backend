@@ -26,6 +26,7 @@ class ProductCommentController extends Controller
 
     public function createOneCommentProduct(Request $request) {
         $comment = Product_comment::create($request->all());
+        $request->user()->id;
         if ($comment) {
             return response()->json(
                 [

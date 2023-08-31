@@ -88,6 +88,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('showListAddressOfUser', [ListAddressController::class, 'showListAddressOfUser']);
     Route::get('getOneAddressOfUserByID/{id}', [ListAddressController::class, 'getOneAddressOfUserByID']);
     Route::put('editAddressByID/{id}', [ListAddressController::class, 'editAddressByID']);
+
+
+
+
+    
 });
 // Long 
 Route::post("/description", [DescriptionController::class, "storeImageUpload"]);
