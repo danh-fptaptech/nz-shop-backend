@@ -10,12 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Product extends Model
 {
     // use HasFactory;
-    protected $fillable = ["category_id"];
-
-    public function product_variants(): HasMany
-    {
-        return $this->hasMany(Product_variant::class);
-    }
+    // protected $fillable = ["category_id"];
 
     public function category(): BelongsTo
     {

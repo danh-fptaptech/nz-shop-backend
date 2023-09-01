@@ -7,7 +7,6 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Product\ProductController;
 use App\Http\Controllers\Product\CategoryController;
-use App\Http\Controllers\Product\ProductVariantController;
 use App\Http\Controllers\Comment\PostCommentController;
 use App\Http\Controllers\Comment\ProductCommentController;
 use App\Http\Controllers\PostController;
@@ -96,11 +95,11 @@ Route::get("/products", [ProductController::class, "getAllProducts"]);
 Route::post("/products", [ProductController::class, "createOneProduct"]);
 Route::put("/products/delete/{id}", [ProductController::class, "deleteOneProduct"]);
 Route::put("/products/recover/{id}", [ProductController::class, "recoverOneProduct"]);
-Route::get("/products/{id}/variants", [ProductController::class, "getAllVariantsByProductId"]);
-Route::get("/products/{id}/variant", [ProductController::class, "getLowPriceVariantByProductId"]);
 Route::get("/products/{slug}", [ProductController::class, "getOneProductBySlug"]);
+Route::get("/products/id/{id}", [ProductController::class, "getOneProductById"]);
 Route::put("/products/update/{id}", [ProductController::class, "updateOneProduct"]);
 Route::get("/products/{id}/comments", [ProductController::class, "getAllComments"]);
+Route::get("/sku", [ProductController::class, "generateSku"]);
 // Route::get("/products/{id}/reviews", [ProductController::class, "getAllReviews"]);
 
 Route::get("/categories", [CategoryController::class, "getAllCategories"]);
@@ -113,12 +112,6 @@ Route::get("/categories/{id}", [CategoryController::class, "getSubCategories"]);
 Route::put("/categories/update/{id}", [CategoryController::class, "updateOneCategory"]);
 Route::get("/recursive-categories/{id}/products/{numbers?}", [CategoryController::class, "getProductsByRecursiveCategoryId"]);
 Route::get("/recursive-categories/{id}", [CategoryController::class, "getRecursiveCategories"]);
-
-Route::get("/variants/{id}", [ProductVariantController::class, "getOneVariantById"]);
-Route::put("/variants/delete/{id}", [ProductVariantController::class, "deleteOneVariant"]);
-Route::put("/variants/recover/{id}", [ProductVariantController::class, "recoverOneVariant"]);
-Route::put("/variants/force-recover/{id}", [ProductVariantController::class, "forceRecoverOneVariant"]);
-Route::put("/variants/update/{id}", [ProductVariantController::class, "updateOneVariant"]);
 
 //Tam 
 Route::get("/post-comments", [PostCommentController::class, "getAllComments"]);
