@@ -93,13 +93,14 @@ Route::post("/description", [DescriptionController::class, "storeImageUpload"]);
 
 Route::get("/products", [ProductController::class, "getAllProducts"]);
 Route::post("/products", [ProductController::class, "createOneProduct"]);
-Route::put("/products/delete/{id}", [ProductController::class, "deleteOneProduct"]);
-Route::put("/products/recover/{id}", [ProductController::class, "recoverOneProduct"]);
+Route::put("/products/toggle/{id}", [ProductController::class, "toggleOneProduct"]);
 Route::get("/products/{slug}", [ProductController::class, "getOneProductBySlug"]);
 Route::get("/products/id/{id}", [ProductController::class, "getOneProductById"]);
 Route::put("/products/update/{id}", [ProductController::class, "updateOneProduct"]);
 Route::get("/products/{id}/comments", [ProductController::class, "getAllComments"]);
 Route::get("/sku", [ProductController::class, "generateSku"]);
+Route::get("/product-pagination", [ProductController::class, "getProductPagination"]);
+Route::delete("/products/delete/{id}", [ProductController::class, "deleteOneProduct"]);
 // Route::get("/products/{id}/reviews", [ProductController::class, "getAllReviews"]);
 
 Route::get("/categories", [CategoryController::class, "getAllCategories"]);

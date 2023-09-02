@@ -27,7 +27,7 @@ return new class extends Migration
             $table->timestamp('start_date')->nullable();
             $table->timestamp('end_date')->nullable();
             $table->text('variants')->nullable();
-            $table->boolean('is_deleted')->default(false);
+            $table->boolean('is_disabled')->default(false);
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
         });

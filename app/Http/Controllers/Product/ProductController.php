@@ -9,6 +9,9 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
+
 use Image;
 
 class ProductController extends Controller
@@ -192,33 +195,17 @@ class ProductController extends Controller
         );
     }
 
-    public function deleteOneProduct($id)
+    public function toggleOneProduct($id)
     {
         $product = Product::find($id);
 
-        $product->is_deleted = true;
+        $product->is_disabled = !$product->is_disabled;
         $product->save();
 
         return response()->json(
             [
                 "status" => "ok",
-                "message" => "Xoá sản phẩm thành công!"
-            ],
-            200
-        );
-    }
-
-    public function recoverOneProduct($id)
-    {
-        $product = Product::find($id);
-
-        $product->is_deleted = false;
-        $product->save();
-
-        return response()->json(
-            [
-                "status" => "ok",
-                "message" => "Khôi phục sản phẩm thành công!"
+                "message" => "Chuyển đổi trạng thái sản phẩm thành công!"
             ],
             200
         );
@@ -367,6 +354,48 @@ class ProductController extends Controller
         error_log($slug);
         $product = Product::where('slug', 'like', $slug)->first();
         return response()->json(["status" => "ok", "data" => $product], 200);
+    }
+
+    public function getProductPagination() {
+        $products = DB::table('products');
+
+        if (request()->query("category_id")) {
+            $products = $products->where('category_id', '=', request()->query('category_id'));
+        }
+
+        if (request()->query('is_deleted')) {
+            $products = $products->where('is_deleted', '=', request()->boolean('is_deleted'));
+        }
+
+        if (request()->query("name")) {
+            $products = $products->where("name", "like", "%" . request()->query('name') . "%");      
+        }
+
+        if (request()->query("per_page")) {
+            $products = $products->paginate(request()->query("per_page"));
+        }
+
+        return response()->json(["data" => [
+            "products" => $products->items(),
+            "numberOfPages" => $products->lastPage(),
+        ]], 200);
+    }
+
+    public function deleteOneProduct($id) {
+        $product = Product::find($id);
+        if ($product) {
+            if (File::exists($product->image)) {
+                File::delete($product->image);
+            }
+
+            foreach (explode("|", $product->gallery) as $file) {
+                Storage::delete("public/$file");
+            }
+            
+            $product->delete();
+
+            return response()->json(["status" => "ok", "message" => "Xoá sản phẩm thành công!"], 200);
+        }
     }
 
     private function create_slug($string)
