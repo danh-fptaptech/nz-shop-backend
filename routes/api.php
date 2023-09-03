@@ -8,7 +8,6 @@ use App\Http\Controllers\SiteSettingController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Product\ProductController;
 use App\Http\Controllers\Product\CategoryController;
-use App\Http\Controllers\Product\ProductVariantController;
 use App\Http\Controllers\Comment\PostCommentController;
 use App\Http\Controllers\Comment\ProductCommentController;
 use App\Http\Controllers\PostController;
@@ -104,12 +103,15 @@ Route::post("/description", [DescriptionController::class, "storeImageUpload"]);
 
 Route::get("/products", [ProductController::class, "getAllProducts"]);
 Route::post("/products", [ProductController::class, "createOneProduct"]);
-Route::put("/products/delete/{id}", [ProductController::class, "deleteOneProduct"]);
-Route::put("/products/recover/{id}", [ProductController::class, "recoverOneProduct"]);
-Route::get("/products/{id}/variants", [ProductController::class, "getAllVariantsByProductId"]);
-Route::get("/products/{id}/variant", [ProductController::class, "getLowPriceVariantByProductId"]);
+Route::put("/products/toggle/{id}", [ProductController::class, "toggleOneProduct"]);
 Route::get("/products/{slug}", [ProductController::class, "getOneProductBySlug"]);
+Route::get("/products/id/{id}", [ProductController::class, "getOneProductById"]);
 Route::put("/products/update/{id}", [ProductController::class, "updateOneProduct"]);
+Route::get("/products/{id}/comments", [ProductController::class, "getAllComments"]);
+Route::get("/sku", [ProductController::class, "generateSku"]);
+Route::get("/product-pagination", [ProductController::class, "getProductPagination"]);
+Route::delete("/products/delete/{id}", [ProductController::class, "deleteOneProduct"]);
+// Route::get("/products/{id}/reviews", [ProductController::class, "getAllReviews"]);
 
 Route::get("/categories", [CategoryController::class, "getAllCategories"]);
 Route::post("/categories", [CategoryController::class, "createOneCategory"]);
@@ -123,12 +125,9 @@ Route::get("/recursive-categories/{id}/products/{numbers?}",
     [CategoryController::class, "getProductsByRecursiveCategoryId"]);
 Route::get("/recursive-categories/{id}", [CategoryController::class, "getRecursiveCategories"]);
 
-Route::put("/variants/delete/{id}", [ProductVariantController::class, "deleteOneVariant"]);
-Route::put("/variants/recover/{id}", [ProductVariantController::class, "recoverOneVariant"]);
-Route::put("/variants/force-recover/{id}", [ProductVariantController::class, "forceRecoverOneVariant"]);
-Route::put("/variants/update/{id}", [ProductVariantController::class, "updateOneVariant"]);
 
 //Tam
+
 Route::get("/post-comments", [PostCommentController::class, "getAllComments"]);
 Route::post("/post-comments", [PostCommentController::class, "createOneComment"]);
 Route::put("/post-comments/approve/{id}", [PostCommentController::class, "approveOneComment"]);
@@ -137,9 +136,8 @@ Route::get("/post-comments/{id}/post-feedbacks", [PostCommentController::class, 
 
 Route::get("/users", [UserController::class, "getAllUsers"]);
 
-Route::get("/posts", [PostController::class, "getAllPosts"]);
+// Route::get("/posts", [PostController::class, "getAllPosts"]);
 Route::get("/posts/{id}/comments", [PostController::class, "getAllComments"]);
-
 
 Route::get("/reviews", [ReviewController::class, "getAllReviews"]);
 Route::post("/reviews", [ReviewController::class, "createOneReview"]);
@@ -151,10 +149,6 @@ Route::post("/product-comments", [ProductCommentController::class, "createOneCom
 Route::put("/product-comments/approve/{id}", [ProductCommentController::class, "approveOneCommentProduct"]);
 Route::put("/product-comments/delete/{id}", [ProductCommentController::class, "deleteOneCommentProduct"]);
 Route::get("/product-comments/{id}/product-feedbacks", [ProductCommentController::class, "getAllProductFeedBacksById"]);
-
-Route::get("/products", [ProductController::class, "getAllProducts"]);
-Route::get("/products/{id}/comments", [ProductController::class, "getAllComments"]);
-Route::get("/products/{id}/reviews", [ProductController::class, "getAllReviews"]);
 
 Route::post("/description", [DescriptionController::class, "storeImageUpload"]);
 
