@@ -56,6 +56,7 @@ class RoleController extends Controller
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //
+
     public function updateRole(Request $request, $id): \Illuminate\Http\JsonResponse
     {
         try {

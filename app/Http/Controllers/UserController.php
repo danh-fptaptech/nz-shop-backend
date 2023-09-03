@@ -53,7 +53,25 @@ class UserController extends Controller
 
         return response()->json($formattedUsers);
     }
-
+//    public function getListUser(Request $request): \Illuminate\Http\JsonResponse
+//    {
+//        $usersQuery = User::with('roles:id,name');
+//        $totalData = $usersQuery->count();
+//        $dataGet = $usersQuery->paginate($request->input('dataInPer') ?: 10);
+//
+//        $formattedUsers = $dataGet->map(function ($user) {
+//            return [
+//                "id" => $user->id,
+//                "full_name" => $user->full_name,
+//                "phone_number" => $user->phone_number,
+//                "email" => $user->email,
+//                "role" => $user->roles->implode('name', ', '),
+//                "isVerify" => $user->email_verified_at ? 'Verified' : 'Pending',
+//                "isSuspended" => $user->suspended
+//            ];
+//        });
+//        return response()->json(['data'=>$formattedUsers,'totalItems'=>$totalData]);
+//    }
     //
     //////////////////////////////////////////////////////////////////////////
     //
@@ -72,7 +90,6 @@ class UserController extends Controller
 
     public function fetchUser(Request $request){
         $user = $request->user();
-
     }
 
     //

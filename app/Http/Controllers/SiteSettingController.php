@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\SiteSetting;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class SiteSettingController extends Controller
@@ -14,52 +17,230 @@ class SiteSettingController extends Controller
         try {
             $validator = Validator::make($data, [
                 'key_setting' => 'bail|required|unique:site_settings|regex:/^[a-zA-Z_]{2,30}$/',
-                'value_setting' => 'bail|required|regex:/^[0-9a-zA-Z\-]{5,50}$/',
             ], [
-                'name.required' => 'Tên không được để trống.',
-                'name.regex' => 'Tên không đúng định dạng. Độ dài 2-100 ký tự gồm chữ và số',
-                'name.unique' => 'Tên đã tồn tại.',
-                'code.required' => 'Code không được để trống.',
-                'code.unique' => 'Code đã tồn tại.',
-                'code.regex' => 'Code không đúng định dạng.Độ dài 5-50 ký tự gồm chữ và số',
-                'type_coupon.required' => 'Loại coupon không được để trống.',
-                'type_coupon.regex' => 'Loại coupon không đúng.',
-                'value.required' => 'Giá trị coupon không được để trống.',
-                'value.numeric' => 'Giá trị coupon phải là số.',
-                'value.min' => 'Giá trị coupon phải là số lớn hơn hoặc bằng 0.',
-                'value.max' => 'Không thể vượt quá 100%.',
-                'type_value.required' => 'Loại giá trị không được để trống.',
-                'type_value.regex' => 'Loại giá trị không đúng.',
+                'key_setting.required' => 'Key không được để trống.',
+                'key_setting.unique' => 'Key đã tồn tại.',
+                'key_setting.regex' => 'Key chỉ bao gồm chữ cái và _.',
             ]);
-            $validator->sometimes('value', 'required|numeric|min:0|max:100', function ($input) {
-                return $input->type_value === 'percent_value';
-            });
             if ($validator->fails()) {
                 return response()->json([
                     'status' => 'error', 'message' => implode(PHP_EOL, $validator->errors()->all())
                 ]);
             }
-
-            $coupon = Coupon::create([
-                'name' => $data['name'],
-                'code' => $data['code'],
-                'type_coupon' => $data['type_coupon'],
-                'value' => $data['value'],
-                'type_value' => $data['type_value'],
+            SiteSetting::create([
+                'key_setting' => $data['key_setting']
             ]);
-            $coupon->products_id = $data['products_id'] ?? null;
-            $coupon->limit_time = $data['limit_time'] ?? null; //isset($data['key']) ? $data['key'] : null;
-            $coupon->date_start = $data['date_start'] ?? null;
-            $coupon->date_end = $data['date_end'] ?? null;
-            $coupon->status = $data['status'] ?? 'active';
-            $coupon->coupon_requests = $data['coupon_requests'] ?? null;
-            $coupon->save();
-
-            return response()->json(['status' => 'ok', 'message' => 'Tạo coupon thành công!']);
-
+            return response()->json(['status' => 'ok', 'message' => 'Tạo Key Setting thành công!']);
         } catch
         (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => substr($e->getMessage(), 0, 150)]);
         }
     }
+
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+    public function updateSetting(Request $request): JsonResponse
+    {
+        $data = $request->all();
+        $errors = [];
+        try {
+            foreach ($data as $key => $value) {
+                $siteSetting = SiteSetting::where('key_setting', $key)->first();
+                if (!$siteSetting) {
+                    $errors[] = 'Không tìm thấy khóa: '.$key;
+                }
+            }
+            if (count($errors) > 0) {
+                $errorMessage = implode("\n", $errors);
+                return response()->json(['status' => 'error', 'message' => $errorMessage]);
+            }
+            foreach ($data as $key => $value) {
+                $siteSetting = SiteSetting::where('key_setting', $key)->first();
+                if (in_array($key, ['logo_bg', 'logo_wh', 'favicon', 'logo_mini', 'meta_tag_social_img'])) {
+//                    Decode Image
+                    $image_64 = $value;
+                    $extension = explode('/', explode(':', substr($image_64, 0, strpos($image_64, ';')))[1])[1];
+                    $replace = substr($image_64, 0, strpos($image_64, ',') + 1);
+                    $image = str_replace($replace, '', $image_64);
+                    $image = str_replace(' ', '+', $image);
+                    $imageName = $key.'_'.time().'.'.$extension;
+                    $storagePath = public_path('images/'.$imageName);
+                    file_put_contents($storagePath, base64_decode($image));
+//                        Storage::disk('public')->put($imageName, base64_decode($image));
+                    $siteSetting->value_setting = 'images/'.$imageName;
+                } else {
+                    $siteSetting->value_setting = $value;
+                }
+                $siteSetting->save();
+            }
+            return response()->json(['status' => 'ok', 'message' => 'Lưu dữ liệu thành công!']);
+        } catch
+        (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => substr($e->getMessage(), 0, 150)]);
+        }
+    }
+
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+    public function getSecretKey(Request $request): JsonResponse
+    {
+        try {
+            $user = $request->user();
+            if (Hash::check($request->input('password'), $user->password)) {
+                $secretKey = SiteSetting::where('key_setting', 'secret_key')->pluck('value_setting')->first();
+                return response()->json(['status' => 'ok', 'message' => 'Xác nhận thành công!', 'data' => $secretKey]);
+            } else {
+                return response()->json(['status' => 'error', 'message' => 'Sai mật khẩu vui long thử lại!']);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => substr($e->getMessage(), 0, 150)
+            ]);
+        }
+
+    }
+
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+
+    public function newSecretKey(): JsonResponse
+    {
+        try {
+            $newKey = hash('sha256', time());
+            $secretKey = SiteSetting::where('key_setting', 'secret_key')->first();
+            $secretKey->value_setting = $newKey;
+            $secretKey->save();
+            return response()->json(['status' => 'ok', 'message' => 'Tạo mã mới thành công!', 'data' => $newKey]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => substr($e->getMessage(), 0, 150)
+            ]);
+        }
+
+    }
+
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+
+    public function fetchGSetting(): JsonResponse
+    {
+        try {
+            $siteName = SiteSetting::where('key_setting', 'site_name')->pluck('value_setting')->first();
+            $logoBG = SiteSetting::where('key_setting', 'logo_bg')->pluck('value_setting')->first();
+            $logoWH = SiteSetting::where('key_setting', 'logo_wh')->pluck('value_setting')->first();
+            $logoMini = SiteSetting::where('key_setting', 'logo_mini')->pluck('value_setting')->first();
+            $favicon = SiteSetting::where('key_setting', 'favicon')->pluck('value_setting')->first();
+            $timeZone = SiteSetting::where('key_setting', 'time_zone')->pluck('value_setting')->first();
+            $langCode = SiteSetting::where('key_setting', 'lang_code')->pluck('value_setting')->first();
+            $idApp = SiteSetting::where('key_setting', 'id_app')->pluck('value_setting')->first();
+            return response()->json([
+                'siteName' => $siteName,
+                'logoBG' => $logoBG,
+                'logoWH' => $logoWH,
+                'logoMini' => $logoMini,
+                'favicon' => $favicon,
+                'timeZone' => $timeZone,
+                'langCode' => $langCode,
+                'idApp' => $idApp,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => substr($e->getMessage(), 0, 150)
+            ]);
+        }
+
+
+    }
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+
+    public function fetchMSetting(): JsonResponse
+    {
+        try {
+            return response()->json([
+                'hostSMTP' => SiteSetting::where('key_setting', 'host_smtp')->pluck('value_setting')->first(),
+                'encryptSMTP' => SiteSetting::where('key_setting', 'encrypt_smtp')->pluck('value_setting')->first(),
+                'portSMTP' => SiteSetting::where('key_setting', 'port_smtp')->pluck('value_setting')->first(),
+                'userSMTP' => SiteSetting::where('key_setting', 'user_smtp')->pluck('value_setting')->first(),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => substr($e->getMessage(), 0, 150)
+            ]);
+        }
+
+
+    }
+
+
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+
+    public function fetchSSetting(): JsonResponse
+    {
+        try {
+            return response()->json([
+                'address' => SiteSetting::where('key_setting', 'shop_address')->pluck('value_setting')->first(),
+                'phone' => SiteSetting::where('key_setting', 'shop_phone')->pluck('value_setting')->first(),
+                'email' => SiteSetting::where('key_setting', 'shop_email')->pluck('value_setting')->first(),
+                'timeWork' => SiteSetting::where('key_setting', 'shop_timeWork')->pluck('value_setting')->first(),
+                'cskh' => SiteSetting::where('key_setting', 'shop_cskh')->pluck('value_setting')->first(),
+                'cskhkn' => SiteSetting::where('key_setting', 'shop_cskhkn')->pluck('value_setting')->first(),
+                'cskhbh' => SiteSetting::where('key_setting', 'shop_cskhbh')->pluck('value_setting')->first(),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => substr($e->getMessage(), 0, 150)
+            ]);
+        }
+
+
+    }
+
+
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+
+    public function fetchSEOSetting(): JsonResponse
+    {
+        try {
+            return response()->json([
+                'metaTagTitle' => SiteSetting::where('key_setting', 'meta_tag_title')->pluck('value_setting')->first(),
+                'favicon' => SiteSetting::where('key_setting', 'favicon')->pluck('value_setting')->first(),
+                'metaTagKeywords' => SiteSetting::where('key_setting', 'meta_tag_keywords')->pluck('value_setting')->first(),
+                'metaTagDescription' => SiteSetting::where('key_setting', 'meta_tag_description')->pluck('value_setting')->first(),
+                'metaTagSocialImg' => SiteSetting::where('key_setting', 'meta_tag_social_img')->pluck('value_setting')->first(),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => substr($e->getMessage(), 0, 150)
+            ]);
+        }
+
+
+    }
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+////
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////                            END FILE
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+////
 }
