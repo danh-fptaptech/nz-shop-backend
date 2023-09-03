@@ -40,7 +40,6 @@ class PostController extends Controller
       "title" => "required",
       "author" => "required",
       "image" => "required",
-      "image.*" => "bail|mimes:jpeg,png,jpg,webp,svg,gif|max:2048",
       "description" => "required",
       "content" => "required",
       "type" => "required",
@@ -53,18 +52,21 @@ class PostController extends Controller
       ], 400);
     } else {
       $post = new Post();
-      $filename = time() . "." . $request->file("image")->getClientOriginalName();
-      $parentPath = "images/post";
-      $destinationPath = public_path($parentPath);
-      $imagePath = "$parentPath/$filename";
+      $image_64 = $request->image;
+                    $extension = explode('/', explode(':', substr($image_64, 0, strpos($image_64, ';')))[1])[1];
+                    $replace = substr($image_64, 0, strpos($image_64, ',') + 1);
+                    $image = str_replace($replace, '', $image_64);
+                    $image = str_replace(' ', '+', $image);
+                    $imageName = 'post'.time().'.'.$extension;
+                    $storagePath = public_path('images/post/'.$imageName);
+                    file_put_contents($storagePath, base64_decode($image));
+                    $post->image = 'images/post/'.$imageName;
       $post->title = $request->title;
       $post->author = $request->author;
       $post->description = $request->description;
       $post->content = $request->content;
       $post->type = $request->type;
-      $post->image = $imagePath;
       $post->save();
-      $request->image->move($destinationPath, $filename);
       if ($post) {
         return response()->json([
           "status" => 201,
@@ -138,7 +140,6 @@ class PostController extends Controller
       $validator = Validator::make($request->all(), [
         "title" => "required",
         "author" => "required",
-        "image.*" => "bail|mimes:jpeg,png,jpg,webp,svg,gif|max:2048",
         "description" => "required",
         "content" => "required",
         "type" => "required",
@@ -161,26 +162,28 @@ class PostController extends Controller
         400
       );
     } else {
-
       $post->title = $request->title;
       $post->author = $request->author;
       $post->description = $request->description;
       $post->content = $request->content;
       $post->type = $request->type;
 
-      if ($request->hasFile('image')) {
-        $parentPath = "images/post";
-        $destinationPath = public_path($parentPath);
-        $imagePath = "$parentPath/$post->image";
-        if (File::exists($imagePath)) {
-          File::delete($imagePath);
+      if($request->image){
+        if(File::exists( $post->image)){
+          File::delete($post->image);
         }
-
-        $filename = time() . "." . $request->file("image")->getClientOriginalName();
-        $imagePath = "$parentPath/$filename";
-        $request->image->move($destinationPath, $filename);
-        $post->image = $imagePath;
-      }
+        
+        $image_64 = $request->image;
+                    $extension = explode('/', explode(':', substr($image_64, 0, strpos($image_64, ';')))[1])[1];
+                    $replace = substr($image_64, 0, strpos($image_64, ',') + 1);
+                    $image = str_replace($replace, '', $image_64);
+                    $image = str_replace(' ', '+', $image);
+                    $imageName = 'post'.time().'.'.$extension;
+                    $storagePath = public_path('images/post/'.$imageName);
+                    file_put_contents($storagePath, base64_decode($image));
+                    $post->image = 'images/post/'.$imageName;
+       }
+     
       $post->save();
       if ($post) {
         return response()->json(

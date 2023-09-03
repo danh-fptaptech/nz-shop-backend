@@ -36,7 +36,6 @@ class SliderController extends Controller
       "name" => "required",
       "title" => "required",
       "image" => "required",
-      "image.*" => "bail|mimes:jpeg,png,jpg,webp,svg,gif|max:2048",
     ]);
 
     if ($validator->fails()) {
@@ -46,15 +45,19 @@ class SliderController extends Controller
       ], 400);
     } else {
       $slider = new Slider();
-      $filename = time() . "." . $request->file("image")->getClientOriginalName();
-      $parentPath = "images/slider";
-      $destinationPath = public_path($parentPath);
-      $imagePath = "$parentPath/$filename";
+      $image_64 = $request->image;
+                    $extension = explode('/', explode(':', substr($image_64, 0, strpos($image_64, ';')))[1])[1];
+                    $replace = substr($image_64, 0, strpos($image_64, ',') + 1);
+                    $image = str_replace($replace, '', $image_64);
+                    $image = str_replace(' ', '+', $image);
+                    $imageName = 'slider'.time().'.'.$extension;
+                    $storagePath = public_path('images/slider/'.$imageName);
+                    file_put_contents($storagePath, base64_decode($image));
+                    $slider->image = 'images/slider/'.$imageName;
       $slider->name = $request->name;
       $slider->title = $request->title;
-      $slider->image = $imagePath;
       $slider->save();
-      $request->image->move($destinationPath, $filename);
+      // $request->image->move($storagePath, $imageName);
       if ($slider) {
         return response()->json([
           "status" => 201,
@@ -121,7 +124,6 @@ class SliderController extends Controller
       $validator = Validator::make($request->all(), [
         "name" => "required",
         "title" => "required",
-        "image" => "bail|mimes:jpeg,png,jpg,webp,svg,gif|max:2048",
       ]);
     } else {
       $validator = Validator::make($request->all(), [
@@ -129,9 +131,7 @@ class SliderController extends Controller
         "title" => "required",
       ]);
     }
-    //error_log($request->name);
 
-    //error_log($request->status);
     if ($validator->fails()) {
       return response()->json(
         [
@@ -141,22 +141,22 @@ class SliderController extends Controller
         400
       );
     } else {
-
       $slider->name = $request->name;
       $slider->title = $request->title;
-
+      $image_64 = $request->image;
+                    $extension = explode('/', explode(':', substr($image_64, 0, strpos($image_64, ';')))[1])[1];
+                    $replace = substr($image_64, 0, strpos($image_64, ',') + 1);
+                    $image = str_replace($replace, '', $image_64);
+                    $image = str_replace(' ', '+', $image);
+                    $imageName = 'slider'.time().'.'.$extension;
+                    $storagePath = public_path('images/slider/'.$imageName);
+                    file_put_contents($storagePath, base64_decode($image));
+                    $slider->image = 'images/slider/'.$imageName;
       if ($request->hasFile('image')) {
-        $parentPath = "images/slider";
-        $destinationPath = public_path($parentPath);
-        $imagePath = "$parentPath/$slider->image";
-        if (File::exists($imagePath)) {
-          File::delete($imagePath);
-        }
-
-        $filename = time() . "." . $request->file("image")->getClientOriginalName();
-        $imagePath = "$parentPath/$filename";
-        $request->image->move($destinationPath, $filename);
-        $slider->image = $imagePath;
+        $storagePath = public_path('images/slider/'.$imageName);
+        if (File::exists($storagePath)) {
+          File::delete($storagePath);
+        }  
       }
       $slider->save();
       if ($slider) {

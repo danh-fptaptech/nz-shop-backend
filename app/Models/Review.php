@@ -7,6 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Review extends Model
 {
-     protected $fillable = ["review", "comment", "user_id", "product_id"];
+     protected $fillable = ["rating", "comment", "user_id", "product_id"];
     //use HasFactory;
+    public function user()
+{
+    return $this->belongsTo(User::class);
 }
+}
+

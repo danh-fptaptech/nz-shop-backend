@@ -134,12 +134,12 @@ Route::get("/users", [UserController::class, "getAllUsers"]);
 Route::get("/posts", [PostController::class, "getAllPosts"]);
 Route::get("/posts/{id}/comments", [PostController::class, "getAllComments"]);
 
-
+// Reviews
 Route::get("/reviews", [ReviewController::class, "getAllReviews"]);
 Route::post("/reviews", [ReviewController::class, "createOneReview"]);
 Route::put("/reviews/approve/{id}", [ReviewController::class, "approveOneReview"]);
 Route::put("/reviews/delete/{id}", [ReviewController::class, "deleteOneReview"]);
-
+// Comments
 Route::get("/product-comments", [ProductCommentController::class, "getAllCommentsProduct"]);
 Route::post("/product-comments", [ProductCommentController::class, "createOneCommentProduct"]);
 Route::put("/product-comments/approve/{id}", [ProductCommentController::class, "approveOneCommentProduct"]);
@@ -152,7 +152,7 @@ Route::get("/products/{id}/reviews", [ProductController::class, "getAllReviews"]
 
 Route::post("/description", [DescriptionController::class, "storeImageUpload"]);
 
-
+// Posts
 Route::get("/posts", [PostController::class, "index"]);
 Route::post("/posts", [PostController::class, "store"]);
 Route::get("/posts/{id}", [PostController::class, "getOnePost"]);

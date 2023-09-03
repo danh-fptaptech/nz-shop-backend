@@ -13,7 +13,7 @@ use Illuminate\Support\Str;
 class ProductController extends Controller
 {
     private $productRules = [
-        "name" => "bail|required|string|min:3|max:25",
+        "name" => "bail|required|string|min:3|max:200",
         "image" => "bail|required|mimes:jpeg,jpg,png,gif,bmp,webp,svg|max:2048",
         "gallery" => "required",
         'gallery.*' => 'bail|mimes:jpeg,jpg,png,gif,bmp,webp,svg|max:2048',
@@ -21,7 +21,7 @@ class ProductController extends Controller
     ];
 
     private $productUpdateRules = [
-        "name" => "bail|required|string|min:3|max:50",
+        "name" => "bail|required|string|min:3|max:200",
         "image" => "bail|mimes:jpeg,jpg,png,gif,bmp,webp,svg|max:2048",
         'gallery.*' => 'bail|mimes:jpeg,jpg,png,gif,bmp,webp,svg|max:2048',
         "description" => "bail|required|string",
@@ -422,8 +422,10 @@ class ProductController extends Controller
 
     public function getAllReviews($id)
     {
-        $reviews = Product::find($id)->reviews;
-
+        $product = Product::find($id);
+        $reviews = $product->reviews()->join("users", "users.id", "=" , "reviews.user_id")
+        ->select("reviews.*", "users.full_name")
+        ->get();
         return response()->json([
             "message" => "success",
             "data" => $reviews,

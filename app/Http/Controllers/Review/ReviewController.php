@@ -23,7 +23,8 @@ class ReviewController extends Controller
 
         return response()->noContent();    
     }
-    
+
+
     public function createOneReview(Request $request) {
         $reviews = Review::create($request->all());
         if ($reviews) {
