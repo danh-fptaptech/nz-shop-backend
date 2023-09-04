@@ -218,18 +218,20 @@ class PostController extends Controller
         200
       );
     }
-
     return response()->noContent();
   }
 
 
   public function getAllComments($id)
-  {
-    $comments = Post::find($id)->comments;
-
-    return response()->json([
-      "message" => "success",
-      "data" => $comments,
-    ], 200);
-  }
+    {
+        $post = Post::find($id);
+        $comments = $post->comments()->join("users", "users.id", "=" , "post_comments.user_id")
+        ->select("post_comments.*", "users.full_name")
+        ->get();
+        return response()->json([
+            "status" => "ok",
+            "message" => "success",
+            "data" => $comments,
+        ], 200);
+    }
 }

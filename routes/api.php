@@ -91,6 +91,7 @@ Route::middleware('auth:sanctum')->group(function () {
 // Long 
 Route::post("/description", [DescriptionController::class, "storeImageUpload"]);
 
+Route::get("/randomProducts", [ProductController::class, "randomProducts"]);
 Route::get("/products", [ProductController::class, "getAllProducts"]);
 Route::post("/products", [ProductController::class, "createOneProduct"]);
 Route::put("/products/toggle/{id}", [ProductController::class, "toggleOneProduct"]);
@@ -124,7 +125,6 @@ Route::get("/post-comments/{id}/post-feedbacks", [PostCommentController::class, 
 Route::get("/users", [UserController::class, "getAllUsers"]);
 
 // Route::get("/posts", [PostController::class, "getAllPosts"]);
-Route::get("/posts/{id}/comments", [PostController::class, "getAllComments"]);
 
 Route::get("/reviews", [ReviewController::class, "getAllReviews"]);
 Route::post("/reviews", [ReviewController::class, "createOneReview"]);
@@ -147,6 +147,7 @@ Route::get("/posts/{title}", [PostController::class, "getPost"]);
 Route::put("/posts/edit/{id}", [PostController::class, "update"]);
 Route::delete("/posts/delete/{id}", [PostController::class, "delete"]);
 Route::get("/randomPosts", [PostController::class, "randomPost"]);
+Route::get("/posts/{id}/comments", [PostController::class, "getAllComments"]);
 
 Route::get("/pages", [PageController::class, "index"]);
 Route::post("/pages", [PageController::class, "store"]);

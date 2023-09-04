@@ -73,6 +73,16 @@ class ProductController extends Controller
         "discountPrice.lt" => "Giá khuyến mãi phải nhỏ hơn giá bán!"
     ];
 
+    public function randomProducts()
+    {
+        $products = Product::where("is_disabled", 0)->get()->random(5);
+        return response()->json([
+        "status" => 200,
+        "data" => $products,
+        "message" => "Get random product successfully."
+        ], 200);
+    }
+
     public function getAllProducts()
     {
         $products = Product::all();
@@ -442,8 +452,10 @@ class ProductController extends Controller
 
     public function getAllComments($id)
     {
-        $comments = Product::find($id)->comments;
-
+        $product = Product::find($id);
+        $comments = $product->comments()->join("users", "users.id", "=" , "product_comments.user_id")
+        ->select("product_comments.*", "users.full_name")
+        ->get();
         return response()->json([
             "status" => "ok",
             "message" => "success",
