@@ -11,13 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('sliders', function (Blueprint $table) {
-            $table->id();
-            $table->string("name");
-            $table->string("title");
-            $table->string("image");
-            $table->boolean("isDeleted")->default(false);
-            $table->timestamps();
+        Schema::table('users', function (Blueprint $table) {
+            $table->boolean('suspended')->nullable();
         });
     }
 
@@ -26,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('sliders');
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropColumn('suspended');
+        });
     }
 };

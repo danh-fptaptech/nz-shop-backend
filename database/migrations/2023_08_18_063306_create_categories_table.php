@@ -16,12 +16,11 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('image');
-            $table->string('icon')->nullable();
-            $table->string('logo')->nullable();
-            $table->boolean('isBrand')->default(false);
             $table->text('description');
-            $table->boolean('isDeleted')->default(false);
             $table->unsignedBigInteger('parent_category_id')->nullable();
+            $table->string('icon')->nullable();
+            $table->boolean('is_brand')->default(false);
+            $table->boolean('is_deleted')->default(false);
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
         });

@@ -3,47 +3,40 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\Post;
 use Illuminate\Http\Request;
+use App\Models\Slider;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Validator;
 
-class PostController extends Controller
-{
-  public function randomPost()
-  {
-    $posts = Post::where("isDeleted", 0)->get()->random(5);
-    return response()->json([
-      "status" => 200,
-      "data" => $posts,
-      "message" => "Get random posts successfully."
-    ], 200);
-  }
+use function Laravel\Prompts\error;
 
+class SliderController extends Controller
+{
   public function index()
   {
-    $posts = Post::all();
-    if ($posts->count() > 0) {
+    $sliders = Slider::all();
+    if ($sliders->count() > 0) {
       return response()->json([
         "status" => 200,
-        "data" => $posts,
-        "message" => "Get all posts successfully."
-      ], 200, []);
+        "data" => $sliders,
+        "message" => "Get all sliders successfully."
+      ], 200);
     } else {
       return response()->noContent();
     }
+    return response()->json([
+      "status" => 404,
+      "message" => "No records found."
+    ], 404);
   }
 
   public function store(Request $request)
   {
     $validator = Validator::make($request->all(), [
+      "name" => "required",
       "title" => "required",
-      "author" => "required",
       "image" => "required",
       "image.*" => "bail|mimes:jpeg,png,jpg,webp,svg,gif|max:2048",
-      "description" => "required",
-      "content" => "required",
-      "type" => "required",
     ]);
 
     if ($validator->fails()) {
@@ -52,24 +45,21 @@ class PostController extends Controller
         "error" => $validator->messages()
       ], 400);
     } else {
-      $post = new Post();
+      $slider = new Slider();
       $filename = time() . "." . $request->file("image")->getClientOriginalName();
-      $parentPath = "images/post";
+      $parentPath = "images/slider";
       $destinationPath = public_path($parentPath);
       $imagePath = "$parentPath/$filename";
-      $post->title = $request->title;
-      $post->author = $request->author;
-      $post->description = $request->description;
-      $post->content = $request->content;
-      $post->type = $request->type;
-      $post->image = $imagePath;
-      $post->save();
+      $slider->name = $request->name;
+      $slider->title = $request->title;
+      $slider->image = $imagePath;
+      $slider->save();
       $request->image->move($destinationPath, $filename);
-      if ($post) {
+      if ($slider) {
         return response()->json([
           "status" => 201,
-          "data" => $post,
-          "message" => "Add new post successfully."
+          "data" => $slider,
+          "message" => "Add new slider successfully."
         ], 201);
       } else {
         return response()->json([
@@ -82,8 +72,8 @@ class PostController extends Controller
 
   public function delete($id)
   {
-    $post = Post::find($id);
-    if (!$post) {
+    $slider = Slider::find($id);
+    if (!$slider) {
       return response()->json(
         [
           "status" => 404,
@@ -92,25 +82,18 @@ class PostController extends Controller
         404
       );
     }
-    $post->isDeleted = true;
-    $post->save();
-    // if ($post->image) {
-    //   $destination = public_path($post->image);
-    //   if (File::exists($destination)) {
-    //     File::delete($destination);
-    //   }
-    // }
-    // $post->delete();
+    $slider->isDeleted = true;
+    $slider->save();
     return response()->json([
       "status" => 200,
-      "message" => "Post was deleted successfully."
+      "message" => "Slider was deleted successfully."
     ], 200);
   }
 
-  public function getOnePost($id)
+  public function getOneSlider($id)
   {
-    $post = Post::find($id);
-    if (!$post) {
+    $slider = Slider::find($id);
+    if (!$slider) {
       return response()->json([
         "status" => 404,
         "message" => "No record found."
@@ -118,7 +101,7 @@ class PostController extends Controller
     } else {
       return response()->json([
         "status" => 200,
-        "data" => $post,
+        "data" => $slider,
         "message" => "Post was found successfully."
       ], 200);
     }
@@ -126,8 +109,8 @@ class PostController extends Controller
 
   public function update(Request $request, $id)
   {
-    $post = Post::find($id);
-    if (!$post) {
+    $slider = Slider::find($id);
+    if (!$slider) {
       return response()->json([
         "status" => 404,
         "message" => "No record found."
@@ -136,22 +119,19 @@ class PostController extends Controller
     $validator = null;
     if ($request->image) {
       $validator = Validator::make($request->all(), [
+        "name" => "required",
         "title" => "required",
-        "author" => "required",
-        "image.*" => "bail|mimes:jpeg,png,jpg,webp,svg,gif|max:2048",
-        "description" => "required",
-        "content" => "required",
-        "type" => "required",
+        "image" => "bail|mimes:jpeg,png,jpg,webp,svg,gif|max:2048",
       ]);
     } else {
       $validator = Validator::make($request->all(), [
+        "name" => "required",
         "title" => "required",
-        "author" => "required",
-        "description" => "required",
-        "content" => "required",
-        "type" => "required",
       ]);
     }
+    //error_log($request->name);
+
+    //error_log($request->status);
     if ($validator->fails()) {
       return response()->json(
         [
@@ -162,16 +142,13 @@ class PostController extends Controller
       );
     } else {
 
-      $post->title = $request->title;
-      $post->author = $request->author;
-      $post->description = $request->description;
-      $post->content = $request->content;
-      $post->type = $request->type;
+      $slider->name = $request->name;
+      $slider->title = $request->title;
 
       if ($request->hasFile('image')) {
-        $parentPath = "images/post";
+        $parentPath = "images/slider";
         $destinationPath = public_path($parentPath);
-        $imagePath = "$parentPath/$post->image";
+        $imagePath = "$parentPath/$slider->image";
         if (File::exists($imagePath)) {
           File::delete($imagePath);
         }
@@ -179,15 +156,15 @@ class PostController extends Controller
         $filename = time() . "." . $request->file("image")->getClientOriginalName();
         $imagePath = "$parentPath/$filename";
         $request->image->move($destinationPath, $filename);
-        $post->image = $imagePath;
+        $slider->image = $imagePath;
       }
-      $post->save();
-      if ($post) {
+      $slider->save();
+      if ($slider) {
         return response()->json(
           [
             "status" => 200,
-            "data" => $post,
-            'message' => 'post was updated successfully.'
+            "data" => $slider,
+            'message' => 'Slider was updated successfully.'
           ],
           200
         );
@@ -201,32 +178,5 @@ class PostController extends Controller
         );
       }
     }
-  }
-  public function getAllPosts()
-  {
-    $posts = Post::all();
-
-    if ($posts->count() > 0) {
-      return response()->json(
-        [
-          "data" => $posts,
-          "message" => "Get all posts successfully",
-        ],
-        200
-      );
-    }
-
-    return response()->noContent();
-  }
-
-
-  public function getAllComments($id)
-  {
-    $comments = Post::find($id)->comments;
-
-    return response()->json([
-      "message" => "success",
-      "data" => $comments,
-    ], 200);
   }
 }

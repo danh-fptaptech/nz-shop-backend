@@ -15,10 +15,12 @@ return new class extends Migration
             $table->id();
             $table->string("title");
             $table->string("author");
-            $table->string("images");
+            $table->string("image");
             $table->text("content");
             $table->string("type");
+            $table->boolean("isDeleted")->default(false);
             $table->timestamps();
+            $table->text("description");
         });
     }
 

@@ -15,6 +15,7 @@ class VerifyApiKey
      */
     public function handle(Request $request, Closure $next): Response
     {
+
 //        Check header Vue-Api-Key
         $apiKey = $request->header('X-Vue-Api-Key');
         $validApiKey = config('app.vue_api_key');
