@@ -50,9 +50,36 @@ class ProductCommentController extends Controller
 
     public function deleteOneCommentProduct($id) {
         $comment = Product_comment::find($id);
+        $feedbacks = $comment->product_feedbacks;
+
+        if ($feedbacks->count() > 0) {
+            return response()->json(
+                [
+                    "message" => "Pending!"
+                ],
+                202
+            );         
+        }
 
         $comment->status = "deleted";
-        $comment->save();
+        $comment->save();   
+
+        return response()->json([
+            "message" => "Deleted!"
+        ], 200);
+    }
+
+    public function deleteAllCommentsProduct($id) {     
+        $comment = Product_comment::find($id);
+        $feedbacks = $comment->product_feedbacks;
+
+        foreach ($feedbacks as $feedback) {
+            $feedback->status = "deleted";
+            $feedback->save();
+        }
+
+        $comment->status = "deleted";
+        $comment->save();   
 
         return response()->json([
             "message" => "Deleted!"
@@ -66,5 +93,17 @@ class ProductCommentController extends Controller
             "message" => "success",
             "data" => $feedbacks,
         ], 200);
+    }
+
+    public function getUserByCommentId($id) {
+        $user = Product_comment::find($id)->user;
+
+        return response()->json(["data" => $user, "message" => "success"], 200); 
+    }
+
+    public function getProductByCommentId($id) {
+        $product = Product_comment::find($id)->product;
+
+        return response()->json(["data" => $product, "message" => "success"], 200); 
     }
 }

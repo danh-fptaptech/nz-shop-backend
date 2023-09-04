@@ -48,11 +48,38 @@ class PostCommentController extends Controller
         ], 200);
     }
 
-    public function deleteOneComment($id) {
+    public function deleteOneCommentPost($id) {
         $comment = Post_comment::find($id);
+        $feedbacks = $comment->post_feedbacks;
+
+        if ($feedbacks->count() > 0) {
+            return response()->json(
+                [
+                    "message" => "Pending!"
+                ],
+                202
+            );         
+        }
 
         $comment->status = "deleted";
-        $comment->save();
+        $comment->save();   
+
+        return response()->json([
+            "message" => "Deleted!"
+        ], 200);
+    }
+
+    public function deleteAllCommentsPost($id) {     
+        $comment = Post_comment::find($id);
+        $feedbacks = $comment->product_feedbacks;
+
+        foreach ($feedbacks as $feedback) {
+            $feedback->status = "deleted";
+            $feedback->save();
+        }
+
+        $comment->status = "deleted";
+        $comment->save();   
 
         return response()->json([
             "message" => "Deleted!"
@@ -66,5 +93,17 @@ class PostCommentController extends Controller
             "message" => "success",
             "data" => $feedbacks,
         ], 200);
+    }
+
+    public function getUserByCommentId($id) {
+        $user = Post_comment::find($id)->user;
+
+        return response()->json(["data" => $user, "message" => "success"], 200); 
+    }
+
+    public function getPostByCommentId($id) {
+        $post = Post_comment::find($id)->post;
+
+        return response()->json(["data" => $post, "message" => "success"], 200); 
     }
 }
