@@ -373,8 +373,8 @@ class ProductController extends Controller
             $products = $products->where('category_id', '=', request()->query('category_id'));
         }
 
-        if (request()->query('is_deleted')) {
-            $products = $products->where('is_deleted', '=', request()->boolean('is_deleted'));
+        if (request()->query('is_disabled')) {
+            $products = $products->where('is_disabled', '=', request()->boolean('is_disabled'));
         }
 
         if (request()->query("name")) {
@@ -405,6 +405,13 @@ class ProductController extends Controller
             $product->delete();
 
             return response()->json(["status" => "ok", "message" => "Xoá sản phẩm thành công!"], 200);
+        }
+    }
+
+    public function getProductsByName($name) {
+        $products = Product::where('name', 'like', "%$name%");
+        if ($products->count() > 0) {
+            return response()->json(["message" => "OK!", "data" => $products], 200);
         }
     }
 

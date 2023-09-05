@@ -91,8 +91,8 @@ Route::middleware('auth:sanctum')->group(function () {
 // Long 
 Route::post("/description", [DescriptionController::class, "storeImageUpload"]);
 
-Route::get("/randomProducts", [ProductController::class, "randomProducts"]);
 Route::get("/products", [ProductController::class, "getAllProducts"]);
+Route::get("/randomProducts", [ProductController::class, "randomProducts"]);
 Route::post("/products", [ProductController::class, "createOneProduct"]);
 Route::put("/products/toggle/{id}", [ProductController::class, "toggleOneProduct"]);
 Route::get("/products/{slug}", [ProductController::class, "getOneProductBySlug"]);
@@ -102,7 +102,7 @@ Route::get("/products/{id}/comments", [ProductController::class, "getAllComments
 Route::get("/sku", [ProductController::class, "generateSku"]);
 Route::get("/product-pagination", [ProductController::class, "getProductPagination"]);
 Route::delete("/products/delete/{id}", [ProductController::class, "deleteOneProduct"]);
-// Route::get("/products/{id}/reviews", [ProductController::class, "getAllReviews"]);
+Route::get("/products/{id}/reviews", [ProductController::class, "getAllReviews"]);
 
 Route::get("/categories", [CategoryController::class, "getAllCategories"]);
 Route::post("/categories", [CategoryController::class, "createOneCategory"]);
