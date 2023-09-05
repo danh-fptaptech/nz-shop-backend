@@ -38,6 +38,8 @@ Route::post('reset-password', [AuthController::class, 'resetPassword'])->name('p
 Route::get('isLogin', [AuthController::class, 'isLogin']);
 Route::middleware('auth:api')->get('isAdmin', [AuthController::class, 'isAdmin']);
 Route::get('getValueByCode/{code}', [CouponController::class, 'getValueByCode']);
+Route::get('verSetting', [SiteSettingController::class, 'verSetting']);
+Route::get('fetchPublicSetting', [SiteSettingController::class, 'fetchPublicSetting']);
 
 
 //Route::middleware('auth:sanctum')->get('/user', function (Request $request) {

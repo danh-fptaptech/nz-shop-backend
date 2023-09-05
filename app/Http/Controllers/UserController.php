@@ -21,13 +21,13 @@ class UserController extends Controller
         $new = User::whereDate('created_at', $today)->count();
         $active = User::whereNotNull('email_verified_at')->count();
         $pending = User::whereNull('email_verified_at')->count();
-        $suspended = User::where('suspended', 'disable')->count();
+        $status = User::where('status', 'disable')->count();
         return response()->json([
             'total' => $totalUsers,
             'new' => $new,
             'active' => $active,
             'pending' => $pending,
-            'suspended' => $suspended
+            'status' => $status
         ]);
     }
 
@@ -47,7 +47,7 @@ class UserController extends Controller
                 "email" => $user->email,
                 "role" => $user->roles->implode('name', ', '),
                 "isVerify" => $user->email_verified_at ? 'Verified' : 'Pending',
-                "isSuspended" => $user->suspended
+                "status" => $user->status
             ];
         });
 
@@ -67,7 +67,7 @@ class UserController extends Controller
 //                "email" => $user->email,
 //                "role" => $user->roles->implode('name', ', '),
 //                "isVerify" => $user->email_verified_at ? 'Verified' : 'Pending',
-//                "isSuspended" => $user->suspended
+//                "status" => $user->status
 //            ];
 //        });
 //        return response()->json(['data'=>$formattedUsers,'totalItems'=>$totalData]);
@@ -78,7 +78,7 @@ class UserController extends Controller
     public function getListUserByQuery(Request $request): \Illuminate\Http\JsonResponse
     {
         $query = $request->input('query');
-        $users = User::where('suspended', 'active')
+        $users = User::where('status', 'active')
             ->Where('email', 'like', "%$query%")
             ->get(['email']);
         return response()->json($users);

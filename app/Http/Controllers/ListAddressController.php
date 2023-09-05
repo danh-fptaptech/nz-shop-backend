@@ -17,12 +17,14 @@ class ListAddressController extends Controller
         try {
             $validator = Validator::make($data, [
                 'name' => 'required',
+                'phone_number' => 'bail|required|string|regex:/^[0-9]{10}$/',
                 'address' => 'required',
                 'ward' => 'required',
                 'district' => 'required',
                 'city' => 'required',
             ], [
-                'required' => ':attribute là dữ liệu bắt buộc'
+                'required' => ':attribute là dữ liệu bắt buộc',
+                'phone_number.regex' => 'Số điện thoại không đúng định dạng',
             ]);
             if ($validator->fails()) {
                 return response()->json([
@@ -33,6 +35,7 @@ class ListAddressController extends Controller
             ListAddress::create([
                 'user_id' => $request->user()->id,
                 'name' => $data['name'],
+                'phone_number' => $data['phone_number'],
                 'address' => $data['address'],
                 'ward' => $data['ward'],
                 'district' => $data['district'],

@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\SiteSetting;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -58,7 +60,10 @@ class SiteSettingController extends Controller
             foreach ($data as $key => $value) {
                 $siteSetting = SiteSetting::where('key_setting', $key)->first();
                 if (in_array($key, ['logo_bg', 'logo_wh', 'favicon', 'logo_mini', 'meta_tag_social_img'])) {
-//                    Decode Image
+                    if (File::exists($siteSetting->value_setting)) {
+                        File::delete($siteSetting->value_setting);
+                    }
+//                  Decode Image
                     $image_64 = $value;
                     $extension = explode('/', explode(':', substr($image_64, 0, strpos($image_64, ';')))[1])[1];
                     $replace = substr($image_64, 0, strpos($image_64, ',') + 1);
@@ -74,6 +79,9 @@ class SiteSettingController extends Controller
                 }
                 $siteSetting->save();
             }
+            $siteSetting = SiteSetting::where('key_setting', 'setting_ver')->first();
+            $siteSetting->value_setting = time();
+            $siteSetting->save();
             return response()->json(['status' => 'ok', 'message' => 'Lưu dữ liệu thành công!']);
         } catch
         (\Exception $e) {
@@ -138,6 +146,8 @@ class SiteSettingController extends Controller
             $favicon = SiteSetting::where('key_setting', 'favicon')->pluck('value_setting')->first();
             $timeZone = SiteSetting::where('key_setting', 'time_zone')->pluck('value_setting')->first();
             $langCode = SiteSetting::where('key_setting', 'lang_code')->pluck('value_setting')->first();
+            $mainColor = SiteSetting::where('key_setting', 'main_color')->pluck('value_setting')->first();
+            $mainFont = SiteSetting::where('key_setting', 'main_font')->pluck('value_setting')->first();
             $idApp = SiteSetting::where('key_setting', 'id_app')->pluck('value_setting')->first();
             return response()->json([
                 'siteName' => $siteName,
@@ -147,6 +157,8 @@ class SiteSettingController extends Controller
                 'favicon' => $favicon,
                 'timeZone' => $timeZone,
                 'langCode' => $langCode,
+                'mainColor' => $mainColor,
+                'mainFont' => $mainFont,
                 'idApp' => $idApp,
             ]);
         } catch (\Exception $e) {
@@ -233,6 +245,68 @@ class SiteSettingController extends Controller
 
     }
 
+
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+
+    public function verSetting(): JsonResponse
+    {
+        try {
+            return response()->json([
+                'setting_ver' => SiteSetting::where('key_setting', 'setting_ver')->pluck('value_setting')->first()
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => substr($e->getMessage(), 0, 150)
+            ]);
+        }
+    }
+
+
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+
+    public function fetchPublicSetting(): JsonResponse
+    {
+        try {
+            return response()->json([
+                'setting_ver' => SiteSetting::where('key_setting', 'setting_ver')->pluck('value_setting')->first(),
+                'site_name' => SiteSetting::where('key_setting', 'site_name')->pluck('value_setting')->first(),
+                'logo_bg' => SiteSetting::where('key_setting', 'logo_bg')->pluck('value_setting')->first(),
+                'logo_wh' => SiteSetting::where('key_setting', 'logo_wh')->pluck('value_setting')->first(),
+                'logo_mini' => SiteSetting::where('key_setting', 'logo_mini')->pluck('value_setting')->first(),
+                'favicon' => SiteSetting::where('key_setting', 'favicon')->pluck('value_setting')->first(),
+                'lang_code' => SiteSetting::where('key_setting', 'lang_code')->pluck('value_setting')->first(),
+                'shop_address' => SiteSetting::where('key_setting', 'shop_address')->pluck('value_setting')->first(),
+                'shop_phone' => SiteSetting::where('key_setting', 'shop_phone')->pluck('value_setting')->first(),
+                'shop_email' => SiteSetting::where('key_setting', 'shop_email')->pluck('value_setting')->first(),
+                'shop_timeWork' => SiteSetting::where('key_setting', 'shop_timeWork')->pluck('value_setting')->first(),
+                'shop_cskh' => SiteSetting::where('key_setting', 'shop_cskh')->pluck('value_setting')->first(),
+                'shop_cskhkn' => SiteSetting::where('key_setting', 'shop_cskhkn')->pluck('value_setting')->first(),
+                'shop_cskhbh' => SiteSetting::where('key_setting', 'shop_cskhbh')->pluck('value_setting')->first(),
+                'meta_tag_title' => SiteSetting::where('key_setting', 'meta_tag_title')->pluck('value_setting')->first(),
+                'meta_tag_keywords' => SiteSetting::where('key_setting', 'meta_tag_keywords')->pluck('value_setting')->first(),
+                'meta_tag_description' => SiteSetting::where('key_setting', 'meta_tag_description')->pluck('value_setting')->first(),
+                'meta_tag_social_img' => SiteSetting::where('key_setting', 'meta_tag_social_img')->pluck('value_setting')->first(),
+                'main_color' => SiteSetting::where('key_setting', 'main_color')->pluck('value_setting')->first(),
+                'main_font' => SiteSetting::where('key_setting', 'main_font')->pluck('value_setting')->first(),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => substr($e->getMessage(), 0, 150)
+            ]);
+        }
+
+    }
+
+
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
