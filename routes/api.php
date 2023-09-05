@@ -103,6 +103,7 @@ Route::middleware('auth:sanctum')->group(function () {
 // Long
 Route::post("/description", [DescriptionController::class, "storeImageUpload"]);
 
+Route::get("/products/name/{name}", [ProductController::class, "getProductsByName"]);
 Route::get("/products", [ProductController::class, "getAllProducts"]);
 Route::post("/products", [ProductController::class, "createOneProduct"]);
 Route::put("/products/toggle/{id}", [ProductController::class, "toggleOneProduct"]);
