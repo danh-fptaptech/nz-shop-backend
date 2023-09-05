@@ -117,19 +117,8 @@ class CategoryController extends Controller
     
     public function deleteOneCategory($id) {
         $category = Category::find($id);
-
-        $childCategories = Category::where("parent_category_id", $category->id);
-        if ($childCategories->count() > 0) {
-            return response()->json(
-                [
-                    "message" => "This category have child categories!"
-                ],
-                202
-            );         
-        }
         
-        $category->is_deleted = true;
-        $category->save();
+        $category->delete();
 
         return response()->json(
             [
@@ -139,64 +128,41 @@ class CategoryController extends Controller
         );
     }
 
-    public function deleteRecursiveCategories($id) {
+    public function disableRecursiveCategories($id) {
         $category = Category::find($id);
 
         $childCategories = Category::where("parent_category_id", $category->id)->get();
         
         if ($childCategories->count() > 0) {    
             foreach ($childCategories as $childCategory) {
-                $this->deleteRecursiveCategories($childCategory->id);
+                $this->disableRecursiveCategories($childCategory->id);
             }
         }
                  
-        $category->is_deleted = true;
+        $category->is_disabled = true;
         $category->save();
 
         return response()->json(
             [
-                "message" => "Delete successfully!"
+                "message" => "Disable successfully!"
             ], 
             200
         );
     }
 
-    public function recoverOneCategory($id) {
-        $category = Category::find($id);
-
-        if ($category->parent_category_id) {
-            return response()->json(
-                [
-                    "message" => "This category have parent category!"
-                ],
-                202
-            );         
-        }
-        
-        $category->is_deleted = false;
-        $category->save();
-
-        return response()->json(
-            [
-                "message" => "Recover successfully!"
-            ], 
-            200
-        );
-    }
-
-    public function recoverRecursiveCategories($id) {
+    public function enableRecursiveCategories($id) {
         $category = Category::find($id);
         
         if ($category->parent_category_id) {    
-            $this->recoverRecursiveCategories($category->parent_category_id);   
+            $this->enableRecursiveCategories($category->parent_category_id);   
         }
                  
-        $category->is_deleted = false;
+        $category->is_disabled = false;
         $category->save();
 
         return response()->json(
             [
-                "message" => "Recover successfully!"
+                "message" => "Enable successfully!"
             ], 
             200
         );

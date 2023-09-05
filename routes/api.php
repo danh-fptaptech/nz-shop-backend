@@ -102,14 +102,14 @@ Route::get("/products/{id}/comments", [ProductController::class, "getAllComments
 Route::get("/sku", [ProductController::class, "generateSku"]);
 Route::get("/product-pagination", [ProductController::class, "getProductPagination"]);
 Route::delete("/products/delete/{id}", [ProductController::class, "deleteOneProduct"]);
+Route::post("/products/sku", [ProductController::class, "getOneProductBySku"]);
 // Route::get("/products/{id}/reviews", [ProductController::class, "getAllReviews"]);
 
 Route::get("/categories", [CategoryController::class, "getAllCategories"]);
 Route::post("/categories", [CategoryController::class, "createOneCategory"]);
 Route::put("/categories/delete/{id}", [CategoryController::class, "deleteOneCategory"]);
-Route::put("/categories/delete-recursively/{id}", [CategoryController::class, "deleteRecursiveCategories"]);
-Route::put("/categories/recover/{id}", [CategoryController::class, "recoverOneCategory"]);
-Route::put("/categories/recover-recursively/{id}", [CategoryController::class, "recoverRecursiveCategories"]);
+Route::put("/categories/disable/{id}", [CategoryController::class, "disableRecursiveCategories"]);
+Route::put("/categories/enable/{id}", [CategoryController::class, "enableRecursiveCategories"]);
 Route::get("/categories/{id}", [CategoryController::class, "getSubCategories"]);
 Route::put("/categories/update/{id}", [CategoryController::class, "updateOneCategory"]);
 Route::get("/recursive-categories/{id}/products/{numbers?}", [CategoryController::class, "getProductsByRecursiveCategoryId"]);
