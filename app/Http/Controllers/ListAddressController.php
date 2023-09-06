@@ -4,13 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\ListAddress;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class ListAddressController extends Controller
 {
-    public function createAddress(Request $request): \Illuminate\Http\JsonResponse
+    public function createAddress(Request $request):JsonResponse
     {
 
         $data = $request->all();
@@ -31,7 +32,21 @@ class ListAddressController extends Controller
                     'status' => 'error', 'message' => implode(PHP_EOL, $validator->errors()->all())
                 ]);
             }
-
+            $addressCount = $request->user()->listAddresses()->count();
+            if($addressCount>=5){
+                return response()->json([
+                    'status' => 'error', 'message' => "Bạn đã số địa chỉ tối đa: 5"
+                ]);
+            }
+            $existingAddress = ListAddress::where('user_id', $request->user()->id)
+                ->where('name', $data['name'])
+                ->first();
+            if ($existingAddress) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Tên Địa chỉ đã tồn tại trong danh sách của bạn.'
+                ]);
+            }
             ListAddress::create([
                 'user_id' => $request->user()->id,
                 'name' => $data['name'],

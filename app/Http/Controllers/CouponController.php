@@ -263,8 +263,9 @@ class CouponController extends Controller
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 
-    public function getValueByCode($code): \Illuminate\Http\JsonResponse
+    public function getValueByCode(Request $request): \Illuminate\Http\JsonResponse
     {
+        $code = $request->input('code');
         $coupon = Coupon::where('code', $code)->first();
         $user = Auth::guard('api')->user();
         if (!$coupon) {
@@ -293,7 +294,18 @@ class CouponController extends Controller
         if ($user && isset(json_decode($coupon->coupon_requests)->forRole) && $user->getRoleNames()[0] !== json_decode($coupon->coupon_requests)->forRole) {
             return response()->json(['status' => 'error', 'message' => 'Mã giảm giá này chỉ dùng cho nhóm chỉ định']);
         }
-        return response()->json(['status' => 'ok', 'message' => 'Thêm mã giảm giá thành công', 'data' => $coupon]);
+        $formattedCoupon = [
+            "id" => $coupon->id,
+            "name" => $coupon->name,
+            "code" => $coupon->code,
+            "products_id" => $coupon->products_id,
+            "type_coupon" => $coupon->type_coupon,
+            "type_value" => $coupon->type_value,
+            "value"=>$coupon->value,
+            "status" => $coupon->status,
+            "coupon_requests" => $coupon->coupon_requests
+        ];
+        return response()->json(['status' => 'ok', 'message' => 'Thêm mã giảm giá thành công', 'data' => $formattedCoupon]);
     }
 
 

@@ -29,6 +29,8 @@ use App\Http\Controllers\Description\DescriptionController;
 */
 
 
+//_____________________________________________________________________
+//  Public
 Route::post('register', [AuthController::class, 'register']);
 Route::post('verify-email', [AuthController::class, 'verify'])->name('verification.verify');
 Route::post('login', [AuthController::class, 'login']);
@@ -37,14 +39,10 @@ Route::post('reset-password', [AuthController::class, 'resetPassword'])->name('p
 
 Route::get('isLogin', [AuthController::class, 'isLogin']);
 Route::middleware('auth:api')->get('isAdmin', [AuthController::class, 'isAdmin']);
-Route::get('getValueByCode/{code}', [CouponController::class, 'getValueByCode']);
+Route::post('getValueByCode', [CouponController::class, 'getValueByCode']);
 Route::get('verSetting', [SiteSettingController::class, 'verSetting']);
 Route::get('fetchPublicSetting', [SiteSettingController::class, 'fetchPublicSetting']);
 
-
-//Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-//    return $request->user();
-//});
 
 Route::middleware('auth:sanctum')->group(function () {
     //_____________________________________________________________________
@@ -61,6 +59,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('searchUsers', [UserController::class, 'getListUserByQuery']);
     Route::get('getListUser', [UserController::class, 'getListUser']);
 
+    //_____________________________________________________________________
     //  Role Controller
     Route::post('createRole', [RoleController::class, 'createRole']);
     Route::post('createRoleWithPermissions', [RoleController::class, 'createRoleWithPermissions']);
@@ -72,10 +71,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('listRoles', [RoleController::class, 'listRoles']);
     Route::get('listPermissions', [RoleController::class, 'listPermissions']);
 
+    //_____________________________________________________________________
     //    Statistics
-
     Route::get('userStats', [UserController::class, 'userStats']);
 
+
+    //_____________________________________________________________________
     //    Manager Coupon
     Route::post('createCoupon', [CouponController::class, 'createCoupon']);
     Route::get('generateUniqueCode', [CouponController::class, 'generateUniqueCode']);
@@ -83,13 +84,16 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('changeStatusCoupon/{id}', [CouponController::class, 'changeStatusCoupon']);
     Route::post('deleteCoupon', [CouponController::class, 'deleteCoupon']);
     Route::put('updateCoupon/{id}', [CouponController::class, 'updateCoupon']);
-    //
+
+    //_____________________________________________________________________
     //    Manager ListAddress
     Route::post('createAddress', [ListAddressController::class, 'createAddress']);
     Route::get('showListAddressOfUser', [ListAddressController::class, 'showListAddressOfUser']);
     Route::get('getOneAddressOfUserByID/{id}', [ListAddressController::class, 'getOneAddressOfUserByID']);
     Route::put('editAddressByID/{id}', [ListAddressController::class, 'editAddressByID']);
-    //~~~~~~~~~~~~
+
+
+    //_____________________________________________________________________
     //    Site Setting
     Route::post('createOne', [SiteSettingController::class, 'createOne']);
     Route::put('updateSetting', [SiteSettingController::class, 'updateSetting']);
@@ -114,6 +118,7 @@ Route::get("/products/{id}/comments", [ProductController::class, "getAllComments
 Route::get("/sku", [ProductController::class, "generateSku"]);
 Route::get("/product-pagination", [ProductController::class, "getProductPagination"]);
 Route::delete("/products/delete/{id}", [ProductController::class, "deleteOneProduct"]);
+
 // Route::get("/products/{id}/reviews", [ProductController::class, "getAllReviews"]);
 
 Route::get("/categories", [CategoryController::class, "getAllCategories"]);

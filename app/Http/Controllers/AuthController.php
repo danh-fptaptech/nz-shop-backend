@@ -143,7 +143,7 @@ class AuthController extends Controller
                 'password' => 'bail|required|regex:/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()]).{8,20}$/'
             ]);
             $user = User::where('email', '=', $request->input('email'))->firstOrFail();
-            if($user->status !== 'active'){
+            if ($user->status !== 'active') {
                 return response()->json(['status' => "error", 'message' => "Tài khoản đã bị khoá."]);
             }
             if (Hash::check($request->input('password'), $user->password)) {
@@ -253,7 +253,7 @@ class AuthController extends Controller
                     }
                 );
                 return $status == Password::PASSWORD_RESET
-                    ? response()->json(['status' => "ok", 'message' => "Đổi mật khẩu thành công", 'isSuccess'=>true])
+                    ? response()->json(['status' => "ok", 'message' => "Đổi mật khẩu thành công", 'isSuccess' => true])
                     : response()->json(['status' => "error", 'message' => "Xác thực không thành công"]);
             }
         } catch (\Exception $e) {
@@ -271,9 +271,10 @@ class AuthController extends Controller
     {
         $user = Auth::user();
         if ($user) {
-            return (Auth::user()->hasRole(1))
+            return ((Auth::user()->hasRole(1) || Auth::user()->hasRole(1))
                 ? response()->json(['isAdmin' => true])
-                : response()->json(['isAdmin' => false]);
+                : response()->json(['isAdmin' => false])
+            );
         } else {
             return response()->json(['isAdmin' => false]);
         }
@@ -430,7 +431,7 @@ class AuthController extends Controller
     {
         $user = User::find($id);
         if ($user) {
-            if($user->status === 'active'){
+            if ($user->status === 'active') {
                 $user->tokens()->delete();
             }
             $user->status = $user->status === 'active' ? 'disable' : 'active';
