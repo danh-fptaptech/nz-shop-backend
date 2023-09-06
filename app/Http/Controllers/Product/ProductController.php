@@ -32,9 +32,9 @@ class ProductController extends Controller
     ];
 
     private $variantRules = [
-        'quantity' => 'bail|required|integer',
-        'originPrice' => 'bail|required|numeric',
-        'sellPrice' => 'bail|required|numeric|gte:originPrice',
+        'quantity' => 'integer',
+        'originPrice' => 'numeric',
+        'sellPrice' => 'bail|numeric|gte:originPrice',
         'discountPrice' => 'bail|numeric|lt:sellPrice|nullable',
         "startDate" => 'bail|required_with:discountPrice|date',
         "endDate" => "bail|required_with:discountPrice|date|after:startDate",
@@ -472,6 +472,65 @@ class ProductController extends Controller
     // sku
     public function generateSku() {
         return response()->json(["data" => $this->generateUniqueCode()], 200);
+    }
+
+    public function getOneProductBySku(Request $request) {
+        $sku = $request->sku;
+        
+        $skuArr = explode('-', $sku);
+        $product = Product::where('sku', 'like', $skuArr[0])
+        ->select('id', 'sku', 'name', 'sell_price', 'origin_price', 'discount_price', 'quantity', 'image', 'variants', 'start_date', 'end_date')
+        ->first();
+
+        if ($product->count() === 0) {
+            return response()->json(["message" => "Không tìm thấy dữ liệu", "status" => "error"], 200);
+        }
+
+        if (count($skuArr) > 1) {
+            $variant = json_decode($product->variants)[$skuArr[1] - 1];
+
+            if ($variant->sellPrice) {
+                $product->sell_price = $variant->sellPrice;
+            }
+            if ($variant->originPrice) {
+                $product->origin_price = $variant->originPrice;
+            }
+            if ($variant->discountPrice) {
+                $product->discount_price = $variant->discountPrice;
+                $product->start_date = $variant->startDate;
+                $product->end_date = $variant->endDate;
+            }
+            if ($variant->quantity) {
+                $product->quantity = $variant->quantity;
+            }
+
+            return response()->json(["data" => [
+                "id" => $product->id,
+                "sku" => $sku,
+                "name" => $product->name,
+                "sell_price"=> $product->sell_price,
+                "origin_price"=> $product->origin_price,
+                "discount_price" => $product->discount_price,
+                "start_date" => $product->start_date,
+                "end_date" => $product->end_date,
+                "quantity" => $product->quantity,
+                "image" => $product->image,
+            ]], 200);
+        }
+        else {
+            return response()->json(["data" =>  [
+                "id" => $product->id,
+                "sku" => $sku,
+                "name" => $product->name,
+                "sell_price"=> $product->sell_price,
+                "origin_price"=> $product->origin_price,
+                "discount_price" => $product->discount_price,
+                "start_date" => $product->start_date,
+                "end_date" => $product->end_date,
+                "quantity" => $product->quantity,
+                "image" => $product->image,
+            ]], 200);
+        }
     }
 
     public function generateUniqueCode(): string
