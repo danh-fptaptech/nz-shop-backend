@@ -20,4 +20,25 @@ class PostFeedbackController extends Controller
             );
         }
     }
+
+        public function toggleApproveOneCommentProduct($id) {
+        $comment = Post_feedback::find($id);
+
+        $comment->is_approved = !$comment->is_approved;
+        $comment->save();
+
+        return response()->json([
+            "message" => "Toggle Approved!"
+        ], 200);
+    }
+
+    public function deleteOneCommentProduct($id) {
+        $comment = Post_feedback::find($id);
+ 
+        $comment->delete();
+
+        return response()->json([
+            "message" => "Deleted!"
+        ], 200);
+    }
 }

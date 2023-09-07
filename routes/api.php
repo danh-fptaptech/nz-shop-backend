@@ -15,6 +15,8 @@ use App\Http\Controllers\PageController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SliderController;
 use App\Http\Controllers\Description\DescriptionController;
+use App\Http\Controllers\Comment\PostFeedbackController;
+use App\Http\Controllers\Comment\ProductFeedbackController;
 
 /*
 |--------------------------------------------------------------------------
@@ -116,29 +118,37 @@ Route::get("/recursive-categories/{id}/products/{numbers?}", [CategoryController
 Route::get("/recursive-categories/{id}", [CategoryController::class, "getRecursiveCategories"]);
 
 //Tam 
-Route::get("/post-comments", [PostCommentController::class, "getAllComments"]);
-Route::post("/post-comments", [PostCommentController::class, "createOneComment"]);
-Route::put("/post-comments/approve/{id}", [PostCommentController::class, "approveOneComment"]);
-Route::put("/post-comments/delete/{id}", [PostCommentController::class, "deleteOneComment"]);
-Route::get("/post-comments/{id}/post-feedbacks", [PostCommentController::class, "getAllPostFeedBacksById"]);
-
 Route::get("/users", [UserController::class, "getAllUsers"]);
 
 // Route::get("/posts", [PostController::class, "getAllPosts"]);
 
 Route::get("/reviews", [ReviewController::class, "getAllReviews"]);
 Route::post("/reviews", [ReviewController::class, "createOneReview"]);
-Route::put("/reviews/approve/{id}", [ReviewController::class, "approveOneReview"]);
+Route::put("/reviews/toggleApprove/{id}", [ReviewController::class, "toggleApproveOneReview"]);
 Route::put("/reviews/delete/{id}", [ReviewController::class, "deleteOneReview"]);
+Route::get("/review-pagination", [ReviewController::class, "getReviewPagination"]);
+
+Route::get("/post-comments", [PostCommentController::class, "getAllCommentsPost"]);
+Route::post("/post-comments", [PostCommentController::class, "createOneComment"]);
+Route::put("/post-comments/toggle/{id}", [PostCommentController::class, "toggleApproveOneCommentPost"]);
+Route::delete("/post-comments/delete/{id}", [PostCommentController::class, "deleteOneCommentPost"]);
+Route::get("/post-comments/{id}/post-feedbacks", [PostCommentController::class, "getAllPostFeedBacksById"]);
+Route::get("/post-comment-pagination", [PostCommentController::class, "getCommentPagination"]);
+Route::get("/post-comment-pagination/{id}/feedback", [PostCommentController::class, "getFeedbackCommentPagination"]);
 
 Route::get("/product-comments", [ProductCommentController::class, "getAllCommentsProduct"]);
 Route::post("/product-comments", [ProductCommentController::class, "createOneCommentProduct"]);
-Route::put("/product-comments/approve/{id}", [ProductCommentController::class, "approveOneCommentProduct"]);
-Route::put("/product-comments/delete/{id}", [ProductCommentController::class, "deleteOneCommentProduct"]);
+Route::put("/product-comments/toggle/{id}", [ProductCommentController::class, "toggleApproveOneCommentProduct"]);
+Route::delete("/product-comments/delete/{id}", [ProductCommentController::class, "deleteOneCommentProduct"]);
 Route::get("/product-comments/{id}/product-feedbacks", [ProductCommentController::class, "getAllProductFeedBacksById"]);
+Route::get("/product-comment-pagination", [ProductCommentController::class, "getCommentPagination"]);
+Route::get("/product-comment-pagination/{id}/feedback", [ProductCommentController::class, "getFeedbackCommentPagination"]);
 
-Route::post("/description", [DescriptionController::class, "storeImageUpload"]);
-
+//feedback 
+Route::put("/product-feedbacks/toggle/{id}", [ProductFeedbackController::class, "toggleApproveOneCommentProduct"]);
+Route::put("/post-feedbacks/toggle/{id}", [PostFeedbackController::class, "toggleApproveOneCommentProduct"]);
+Route::delete("/product-feedbacks/delete/{id}", [ProductFeedbackController::class, "deleteOneCommentProduct"]);
+Route::delete("/post-feedbacks/delete/{id}", [PostFeedbackController::class, "deleteOneCommentProduct"]);
 
 Route::get("/posts", [PostController::class, "index"]);
 Route::post("/posts", [PostController::class, "store"]);
