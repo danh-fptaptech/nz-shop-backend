@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::table('post_feedbacks', function (Blueprint $table) {
             $table->foreignId("post_comment_id")->constrained()->onUpdate("cascade")->onDelete("cascade");
+            $table->foreignId("user_id")->constrained()->onUpdate("cascade")->onDelete("cascade");
         });
     }
 
@@ -23,6 +24,7 @@ return new class extends Migration
     {
         Schema::table('post_feedbacks', function (Blueprint $table) {
             $table->dropForeign(["post_comment_id"]);
+            $table->dropForeign(["user_id"]);
         });
     }
 };

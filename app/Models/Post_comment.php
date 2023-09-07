@@ -16,7 +16,11 @@ class Post_comment extends Model
     public function user(): BelongsTo {
         return $this->belongsTo(User::class);
     }
-
+  
+    public function post(): BelongsTo {
+        return $this->belongsTo(Post::class);
+    }
+    
     public function post_feedbacks(): HasMany {
         return $this->hasMany(Post_feedback::class);
     }
