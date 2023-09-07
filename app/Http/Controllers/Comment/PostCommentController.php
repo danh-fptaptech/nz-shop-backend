@@ -13,7 +13,7 @@ class PostCommentController extends Controller
         $comments = DB::table('post_comments')
         ->join('users', 'users.id', '=', 'post_comments.user_id')
         ->join('posts', 'posts.id', '=', 'post_comments.post_id')
-        ->join("post_feedbacks", "post_comments.id", "=", "post_feedbacks.post_comment_id") 
+        ->leftJoin("post_feedbacks", "post_comments.id", "=", "post_feedbacks.post_comment_id") 
         ->select('post_comments.id', 'post_comments.comment', 'post_comments.is_approved', 'post_comments.updated_at',
         'users.full_name', 'posts.title as post_title', DB::raw('count(*) as feedback_count'),
         DB::raw('count(CASE WHEN post_feedbacks.is_approved <> 1 THEN 1 END) as pending_feedback_count'))
@@ -94,7 +94,7 @@ class PostCommentController extends Controller
         $comments = DB::table('post_comments')
         ->join('users', 'users.id', '=', 'post_comments.user_id')
         ->join('posts', 'posts.id', '=', 'post_comments.post_id')
-        ->join("post_feedbacks", "post_comments.id", "=", "post_feedbacks.post_comment_id") 
+        ->leftJoin("post_feedbacks", "post_comments.id", "=", "post_feedbacks.post_comment_id") 
         ->select('post_comments.id', 'post_comments.comment', 'post_comments.is_approved', 'post_comments.updated_at',
         'users.full_name', 'posts.title as post_title', DB::raw('count(*) as feedback_count'),
         DB::raw('count(CASE WHEN post_feedbacks.is_approved <> 1 THEN 1 END) as pending_feedback_count'))

@@ -124,8 +124,9 @@ Route::get("/posts/{id}/comments", [PostController::class, "getAllComments"]);
 
 Route::get("/reviews", [ReviewController::class, "getAllReviews"]);
 Route::post("/reviews", [ReviewController::class, "createOneReview"]);
-Route::put("/reviews/approve/{id}", [ReviewController::class, "approveOneReview"]);
+Route::put("/reviews/toggleApprove/{id}", [ReviewController::class, "toggleApproveOneReview"]);
 Route::put("/reviews/delete/{id}", [ReviewController::class, "deleteOneReview"]);
+Route::get("/review-pagination", [ReviewController::class, "getReviewPagination"]);
 
 Route::get("/post-comments", [PostCommentController::class, "getAllCommentsPost"]);
 Route::post("/post-comments", [PostCommentController::class, "createOneComment"]);
