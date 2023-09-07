@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 
 class ReviewController extends Controller
 {
-        public function getAllReviews() {
+    public function getAllReviews() {
             $reviews = DB::table('reviews')
         ->join('users', 'users.id', '=', 'reviews.user_id')
         ->join('products', 'products.id', '=', 'reviews.product_id')
