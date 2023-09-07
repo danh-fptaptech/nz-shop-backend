@@ -68,4 +68,8 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(ListAddress::class);
     }
+     public function review(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Review::class);
+    }
 }

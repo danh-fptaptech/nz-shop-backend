@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\API_PROXY_GHTK;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CouponController;
 use App\Http\Controllers\GenerateImageController;
@@ -116,6 +115,7 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::post("/description", [DescriptionController::class, "storeImageUpload"]);
 Route::get("/products/name/{name}", [ProductController::class, "getProductsByName"]);
 Route::get("/products", [ProductController::class, "getAllProducts"]);
+Route::get("/randomProducts", [ProductController::class, "randomProducts"]);
 Route::post("/products", [ProductController::class, "createOneProduct"]);
 Route::put("/products/toggle/{id}", [ProductController::class, "toggleOneProduct"]);
 Route::get("/products/{slug}", [ProductController::class, "getOneProductBySlug"]);
@@ -126,7 +126,7 @@ Route::get("/sku", [ProductController::class, "generateSku"]);
 Route::get("/product-pagination", [ProductController::class, "getProductPagination"]);
 Route::delete("/products/delete/{id}", [ProductController::class, "deleteOneProduct"]);
 Route::post("/products/sku", [ProductController::class, "getOneProductBySku"]);
-// Route::get("/products/{id}/reviews", [ProductController::class, "getAllReviews"]);
+Route::get("/products/{id}/reviews", [ProductController::class, "getAllReviews"]);
 
 Route::get("/categories", [CategoryController::class, "getAllCategories"]);
 Route::post("/categories", [CategoryController::class, "createOneCategory"]);
@@ -148,7 +148,6 @@ Route::get("/post-comments/{id}/post-feedbacks", [PostCommentController::class, 
 Route::get("/users", [UserController::class, "getAllUsers"]);
 
 // Route::get("/posts", [PostController::class, "getAllPosts"]);
-Route::get("/posts/{id}/comments", [PostController::class, "getAllComments"]);
 
 Route::get("/reviews", [ReviewController::class, "getAllReviews"]);
 Route::post("/reviews", [ReviewController::class, "createOneReview"]);
@@ -171,6 +170,7 @@ Route::get("/posts/{title}", [PostController::class, "getPost"]);
 Route::put("/posts/edit/{id}", [PostController::class, "update"]);
 Route::delete("/posts/delete/{id}", [PostController::class, "delete"]);
 Route::get("/randomPosts", [PostController::class, "randomPost"]);
+Route::get("/posts/{id}/comments", [PostController::class, "getAllComments"]);
 
 Route::get("/pages", [PageController::class, "index"]);
 Route::post("/pages", [PageController::class, "store"]);
