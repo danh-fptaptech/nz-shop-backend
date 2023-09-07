@@ -18,8 +18,8 @@ class VerifyApiKey
     {
 //        dd(SiteSetting::where('key_setting', 'key_name_app')->pluck('value_setting')->first());
 
-        $apiKey = $request->header(SiteSetting::where('key_setting', 'key_name_app')->pluck('value_setting')->first()??'X-Vue-Api-Key');
-        $validApiKey = SiteSetting::where('key_setting', 'key_value_app')->pluck('value_setting')->first()??config('app.vue_api_key');
+        $apiKey = $request->header('X-Vue-Api-Key');
+        $validApiKey = config('app.vue_api_key');
         $idApp = $request->header(SiteSetting::where('key_setting', 'id_app')->pluck('value_setting')->first());
         $secretKey = SiteSetting::where('key_setting', 'secret_key')->pluck('value_setting')->first();
 //        dd($secretKey);

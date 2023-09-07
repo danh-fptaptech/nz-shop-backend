@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
+//use Illuminate\Support\Facades\Crypt;
+
 class SiteSettingController extends Controller
 {
     public function createOne(Request $request): JsonResponse
@@ -136,6 +138,30 @@ class SiteSettingController extends Controller
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 
+    public function newIdApp(): JsonResponse
+    {
+        try {
+            $newID = time();
+            $idApp = SiteSetting::where('key_setting', 'id_app')->first();
+            $idApp->value_setting = $newID;
+            $idApp->save();
+            return response()->json(['status' => 'ok', 'message' => 'Cấp mới ID App thành công!', 'data' => $newID]);
+//            $payload = Crypt::encrypt($newID);
+//            return response()->json(['status' => 'ok', 'message' => 'Cấp mới ID App thành công!', 'data' => $payload,'encrypted'=>true]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => substr($e->getMessage(), 0, 150)
+            ]);
+        }
+
+    }
+
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+
+
     public function fetchGSetting(): JsonResponse
     {
         try {
@@ -231,9 +257,12 @@ class SiteSettingController extends Controller
             return response()->json([
                 'metaTagTitle' => SiteSetting::where('key_setting', 'meta_tag_title')->pluck('value_setting')->first(),
                 'favicon' => SiteSetting::where('key_setting', 'favicon')->pluck('value_setting')->first(),
-                'metaTagKeywords' => SiteSetting::where('key_setting', 'meta_tag_keywords')->pluck('value_setting')->first(),
-                'metaTagDescription' => SiteSetting::where('key_setting', 'meta_tag_description')->pluck('value_setting')->first(),
-                'metaTagSocialImg' => SiteSetting::where('key_setting', 'meta_tag_social_img')->pluck('value_setting')->first(),
+                'metaTagKeywords' => SiteSetting::where('key_setting',
+                    'meta_tag_keywords')->pluck('value_setting')->first(),
+                'metaTagDescription' => SiteSetting::where('key_setting',
+                    'meta_tag_description')->pluck('value_setting')->first(),
+                'metaTagSocialImg' => SiteSetting::where('key_setting',
+                    'meta_tag_social_img')->pluck('value_setting')->first(),
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -287,10 +316,14 @@ class SiteSettingController extends Controller
                 'shop_cskh' => SiteSetting::where('key_setting', 'shop_cskh')->pluck('value_setting')->first(),
                 'shop_cskhkn' => SiteSetting::where('key_setting', 'shop_cskhkn')->pluck('value_setting')->first(),
                 'shop_cskhbh' => SiteSetting::where('key_setting', 'shop_cskhbh')->pluck('value_setting')->first(),
-                'meta_tag_title' => SiteSetting::where('key_setting', 'meta_tag_title')->pluck('value_setting')->first(),
-                'meta_tag_keywords' => SiteSetting::where('key_setting', 'meta_tag_keywords')->pluck('value_setting')->first(),
-                'meta_tag_description' => SiteSetting::where('key_setting', 'meta_tag_description')->pluck('value_setting')->first(),
-                'meta_tag_social_img' => SiteSetting::where('key_setting', 'meta_tag_social_img')->pluck('value_setting')->first(),
+                'meta_tag_title' => SiteSetting::where('key_setting',
+                    'meta_tag_title')->pluck('value_setting')->first(),
+                'meta_tag_keywords' => SiteSetting::where('key_setting',
+                    'meta_tag_keywords')->pluck('value_setting')->first(),
+                'meta_tag_description' => SiteSetting::where('key_setting',
+                    'meta_tag_description')->pluck('value_setting')->first(),
+                'meta_tag_social_img' => SiteSetting::where('key_setting',
+                    'meta_tag_social_img')->pluck('value_setting')->first(),
                 'main_color' => SiteSetting::where('key_setting', 'main_color')->pluck('value_setting')->first(),
                 'main_font' => SiteSetting::where('key_setting', 'main_font')->pluck('value_setting')->first(),
             ]);
@@ -303,6 +336,52 @@ class SiteSettingController extends Controller
 
     }
 
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+
+
+    public function fetchDSetting(): JsonResponse
+    {
+        try {
+            return response()->json([
+                'custom_Shipping' => SiteSetting::where('key_setting',
+                    'custom_Shipping')->pluck('value_setting')->first(),
+                'api_ghtk' => SiteSetting::where('key_setting', 'api_ghtk')->pluck('value_setting')->first(),
+                'api_ghn' => SiteSetting::where('key_setting', 'api_ghn')->pluck('value_setting')->first(),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => substr($e->getMessage(), 0, 150)
+            ]);
+        }
+
+
+    }
+
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+
+    public function fetchPublicDSetting(): JsonResponse
+    {
+        try {
+            return response()->json([
+                'custom_Shipping' => SiteSetting::where('key_setting',
+                    'custom_Shipping')->pluck('value_setting')->first(),
+                'api_ghtk' => SiteSetting::where('key_setting', 'api_ghtk')->pluck('value_setting')->first() !== null,
+                'api_ghn' => SiteSetting::where('key_setting', 'api_ghn')->pluck('value_setting')->first() !== null,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => substr($e->getMessage(), 0, 150)
+            ]);
+        }
+
+
+    }
 
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////

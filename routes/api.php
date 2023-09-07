@@ -1,7 +1,9 @@
 <?php
 
+use App\Http\Controllers\API_PROXY_GHTK;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CouponController;
+use App\Http\Controllers\GenerateImageController;
 use App\Http\Controllers\ListAddressController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SiteSettingController;
@@ -38,11 +40,14 @@ Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
 Route::post('reset-password', [AuthController::class, 'resetPassword'])->name('password.reset');
 //Route::get('isAdmin', [AuthController::class, 'isAdmin']);
 
+Route::get('fetchPublicDSetting', [SiteSettingController::class, 'fetchPublicDSetting']);
 Route::get('isLogin', [AuthController::class, 'isLogin']);
 Route::middleware('auth:api')->get('isAdmin', [AuthController::class, 'isAdmin']);
 Route::post('getValueByCode', [CouponController::class, 'getValueByCode']);
 Route::get('verSetting', [SiteSettingController::class, 'verSetting']);
 Route::get('fetchPublicSetting', [SiteSettingController::class, 'fetchPublicSetting']);
+//Route::get('/generateImage/{width}/{height}/{background}/{text}', [GenerateImageController::class, 'generate']);
+Route::post('API_PROXY_GHTK', [API_PROXY_GHTK::class, 'index']);
 
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -100,14 +105,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('updateSetting', [SiteSettingController::class, 'updateSetting']);
     Route::post('getSecretKey', [SiteSettingController::class, 'getSecretKey']);
     Route::get('newSecretKey', [SiteSettingController::class, 'newSecretKey']);
+    Route::get('newIdApp', [SiteSettingController::class, 'newIdApp']);
     Route::get('fetchGSetting', [SiteSettingController::class, 'fetchGSetting']);
     Route::get('fetchMSetting', [SiteSettingController::class, 'fetchMSetting']);
     Route::get('fetchSSetting', [SiteSettingController::class, 'fetchSSetting']);
     Route::get('fetchSEOSetting', [SiteSettingController::class, 'fetchSEOSetting']);
+    Route::get('fetchDSetting', [SiteSettingController::class, 'fetchDSetting']);
 });
 // Long
 Route::post("/description", [DescriptionController::class, "storeImageUpload"]);
-
 Route::get("/products/name/{name}", [ProductController::class, "getProductsByName"]);
 Route::get("/products", [ProductController::class, "getAllProducts"]);
 Route::post("/products", [ProductController::class, "createOneProduct"]);
