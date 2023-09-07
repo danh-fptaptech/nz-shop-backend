@@ -53,6 +53,8 @@ class ReviewController extends Controller
 
         $reviews->status = "deleted";
         $reviews->save();
+        $reviews->delete();
+
 
         return response()->json([
             "message" => "Deleted!"

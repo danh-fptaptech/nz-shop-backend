@@ -8,6 +8,28 @@ use Illuminate\Http\Request;
 
 class ProductFeedbackController extends Controller
 {
+
+    public function toggleApproveOneCommentProduct($id) {
+        $comment = Product_feedback::find($id);
+
+        $comment->is_approved = !$comment->is_approved;
+        $comment->save();
+
+        return response()->json([
+            "message" => "Toggle Approved!"
+        ], 200);
+    }
+
+    public function deleteOneCommentProduct($id) {
+        $comment = Product_feedback::find($id);
+ 
+        $comment->delete();
+
+        return response()->json([
+            "message" => "Deleted!"
+        ], 200);
+    }
+
     public function createOneFeedBack(Request $request) {
         $feedback = Product_feedback::create($request->all());
         if ($feedback) {
@@ -19,59 +41,5 @@ class ProductFeedbackController extends Controller
                 201
             );
         }
-    }
-
-    public function deleteOneFeedBack($id) {
-        $feedback = Product_feedback::find($id);
-        $feedback->status = "deleted";
-        $feedback->save();
-
-        return response()->json(
-            [ 
-                "message" => "Delete a feedback successfully",
-            ],
-            200
-        );
-    }
-
-    public function approveOneFeedBack($id) {
-        $feedback = Product_feedback::find($id);
-        $comment = $feedback->product_comment;
-        if ($comment->status !== "approved") {
-            return response()->json(
-                [
-                    "message" => "Pending!"
-                ],
-                202
-            );       
-        }
-
-        $feedback->status = "approved";
-        $feedback->save();
-
-        return response()->json(
-            [ 
-                "message" => "Approve a feedback successfully",
-            ],
-            200
-        );
-    }
-
-    public function approveAllComments($id) {
-        $feedback = Product_feedback::find($id);
-        $comment = $feedback->product_comment;
-        
-        $feedback->status = "approved";
-        $feedback->save();
-
-        $comment->status = "approved";
-        $comment->save();
-
-        return response()->json(
-            [ 
-                "message" => "Approve successfully",
-            ],
-            200
-        );
     }
 }
