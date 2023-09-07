@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\API_PROXY_GHTK;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CouponController;
 use App\Http\Controllers\GenerateImageController;
