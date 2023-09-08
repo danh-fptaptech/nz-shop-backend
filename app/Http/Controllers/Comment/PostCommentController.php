@@ -15,7 +15,7 @@ class PostCommentController extends Controller
         ->join('posts', 'posts.id', '=', 'post_comments.post_id')
         ->leftJoin("post_feedbacks", "post_comments.id", "=", "post_feedbacks.post_comment_id") 
         ->select('post_comments.id', 'post_comments.comment', 'post_comments.is_approved', 'post_comments.updated_at',
-        'users.full_name', 'posts.title as post_title', DB::raw('count(*) as feedback_count'),
+        'users.full_name', 'posts.title as post_title', DB::raw('count(post_feedbacks.id) as feedback_count'),
         DB::raw('count(CASE WHEN post_feedbacks.is_approved <> 1 THEN 1 END) as pending_feedback_count'))
         ->groupBy('post_comments.id', 'post_comments.comment', 'users.full_name', 'post_title', 
         'post_comments.is_approved', 'post_comments.updated_at')
@@ -96,7 +96,7 @@ class PostCommentController extends Controller
         ->join('posts', 'posts.id', '=', 'post_comments.post_id')
         ->leftJoin("post_feedbacks", "post_comments.id", "=", "post_feedbacks.post_comment_id") 
         ->select('post_comments.id', 'post_comments.comment', 'post_comments.is_approved', 'post_comments.updated_at',
-        'users.full_name', 'posts.title as post_title', DB::raw('count(*) as feedback_count'),
+        'users.full_name', 'posts.title as post_title', DB::raw('count(post_feedbacks.id) as feedback_count'),
         DB::raw('count(CASE WHEN post_feedbacks.is_approved <> 1 THEN 1 END) as pending_feedback_count'))
         ->groupBy('post_comments.id', 'post_comments.comment', 'users.full_name', 'post_title', 
         'post_comments.is_approved', 'post_comments.updated_at');

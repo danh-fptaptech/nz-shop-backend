@@ -439,7 +439,7 @@ class ProductController extends Controller
         return $string;
     }
 
-    public function getAllComments($id)
+    public function  omments($id)
     {
         $comments = Product::find($id)->comments;
 

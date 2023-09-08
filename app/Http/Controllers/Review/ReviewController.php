@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 class ReviewController extends Controller
 {
     public function getAllReviews() {
-            $reviews = DB::table('reviews')
+        $reviews = DB::table('reviews')
         ->join('users', 'users.id', '=', 'reviews.user_id')
         ->join('products', 'products.id', '=', 'reviews.product_id')
         ->select('reviews.*','products.name','users.full_name')
@@ -68,7 +68,7 @@ class ReviewController extends Controller
         $reviews = DB::table('reviews')
         ->join('users', 'users.id', '=', 'reviews.user_id')
         ->join('products', 'products.id', '=', 'reviews.product_id')
-        ->select('reviews.*','products.name','users.full_name');
+        ->select('reviews.*','products.name','users.full_name','products.slug');
         
 
         if (request()->query('is_approved')) {
