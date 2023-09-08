@@ -14,11 +14,11 @@ class ProductCommentController extends Controller
         ->join('users', 'users.id', '=', 'product_comments.user_id')
         ->join('products', 'products.id', '=', 'product_comments.product_id')
         ->leftJoin("product_feedbacks", "product_comments.id", "=", "product_feedbacks.product_comment_id") 
-        ->select('product_comments.id', 'product_comments.comment', 'product_comments.is_approved', 'product_comments.updated_at',
+        ->select('product_comments.id', 'product_comments.comment', 'product_comments.is_approved', 'product_comments.created_at',
         'users.full_name', 'products.name as product_name', DB::raw('count(*) as feedback_count'),  
         DB::raw('count(CASE WHEN product_feedbacks.is_approved <> 1 THEN 1 END) as pending_feedback_count'))
         ->groupBy('product_comments.id', 'product_comments.comment', 'users.full_name', 'product_name', 
-        'product_comments.is_approved', 'product_comments.updated_at')
+        'product_comments.is_approved', 'product_comments.created_at')
         ->get();
             
         if ($comments->count() > 0) {
@@ -95,11 +95,11 @@ class ProductCommentController extends Controller
         ->join('users', 'users.id', '=', 'product_comments.user_id')
         ->join('products', 'products.id', '=', 'product_comments.product_id')
         ->leftJoin("product_feedbacks", "product_comments.id", "=", "product_feedbacks.product_comment_id") 
-        ->select('products.slug','product_comments.id', 'product_comments.comment', 'product_comments.is_approved', 'product_comments.updated_at',
+        ->select('products.slug','product_comments.id', 'product_comments.comment', 'product_comments.is_approved', 'product_comments.created_at',
         'users.full_name', 'products.name as product_name', DB::raw('count(product_feedbacks.id) as feedback_count'),
         DB::raw('count(CASE WHEN product_feedbacks.is_approved <> 1 THEN 1 END) as pending_feedback_count'))
         ->groupBy('products.slug','product_comments.id', 'product_comments.comment', 'users.full_name', 'product_name', 
-        'product_comments.is_approved', 'product_comments.updated_at');
+        'product_comments.is_approved', 'product_comments.created_at');
         
 
         if (request()->query('is_approved')) {
