@@ -241,6 +241,7 @@ class CouponController extends Controller
                 $coupon->code = $data['code'];
                 $coupon->type_coupon = $data['type_coupon'];
                 $coupon->value = $data['value'];
+                $coupon->products_id = $data['products_id'] ?? null;
                 $coupon->type_value = $data['type_value'];
                 $coupon->limit_time = $data['limit_time'] ?? null; //isset($data['key']) ? $data['key'] : null;
                 $coupon->date_start = $data['date_start'] ?? null;
@@ -263,9 +264,9 @@ class CouponController extends Controller
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 
-    public function getValueByCode(Request $request): \Illuminate\Http\JsonResponse
+    public function getValueByCode(): \Illuminate\Http\JsonResponse
     {
-        $code = $request->input('code');
+        $code = request()->input('coupon');
         $coupon = Coupon::where('code', $code)->first();
         $user = Auth::guard('api')->user();
         if (!$coupon) {

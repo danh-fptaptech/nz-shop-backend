@@ -6,6 +6,7 @@ use App\Notifications\ResetPasswordNotification;
 use App\Notifications\Verify_email;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\URL;
@@ -64,12 +65,24 @@ class User extends Authenticatable implements MustVerifyEmail
         $this->notify(new Verify_email());
     }
 
-    public function listAddresses(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function listAddresses(): HasMany
     {
         return $this->hasMany(ListAddress::class);
     }
-     public function review(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function review(): HasMany
     {
         return $this->hasMany(Review::class);
+    }
+    public function order(): HasMany
+    {
+        return $this->hasMany(Order::class);
+    }
+    public function tracking(): HasMany
+    {
+        return $this->hasMany(Order::class);
+    }
+    public function transaction(): HasMany
+    {
+        return $this->hasMany(Order::class);
     }
 }

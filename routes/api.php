@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CouponController;
 use App\Http\Controllers\GenerateImageController;
 use App\Http\Controllers\ListAddressController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SiteSettingController;
 use App\Http\Controllers\UserController;
@@ -51,6 +52,9 @@ Route::get('fetchPublicSetting', [SiteSettingController::class, 'fetchPublicSett
 //Route::get('/generateImage/{width}/{height}/{background}/{text}', [GenerateImageController::class, 'generate']);
 Route::post('API_PROXY_GHTK', [API_PROXY_GHTK::class, 'index']);
 
+    //_____________________________________________________________________
+    //    Oder
+    Route::post('createOrder',[OrderController::class,'createOrder']);
 
 Route::middleware('auth:sanctum')->group(function () {
     //_____________________________________________________________________
@@ -113,6 +117,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('fetchSSetting', [SiteSettingController::class, 'fetchSSetting']);
     Route::get('fetchSEOSetting', [SiteSettingController::class, 'fetchSEOSetting']);
     Route::get('fetchDSetting', [SiteSettingController::class, 'fetchDSetting']);
+
 });
 // Long
 Route::post("/description", [DescriptionController::class, "storeImageUpload"]);
