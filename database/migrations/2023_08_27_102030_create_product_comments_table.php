@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('product_comments', function (Blueprint $table) {
             $table->id();
             $table->text("comment");  
-            $table->enum('status', ['pending', 'approved', 'deleted'])->default('pending');       
+            $table->boolean('is_approved')->default(false);       
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
         });

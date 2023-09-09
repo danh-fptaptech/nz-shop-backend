@@ -7,7 +7,6 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
@@ -446,7 +445,7 @@ class ProductController extends Controller
         return $string;
     }
 
-    public function getAllComments($id)
+    public function  omments($id)
     {
         $comments = Product::find($id)->comments;
 
@@ -576,6 +575,9 @@ class ProductController extends Controller
     }
 
     public function getAverageReview($id) {
-        // $data = Product::find($id)->reviews()->select(DB::raw())
+        
+        $data = Product::find($id)->reviews()->select(DB::raw('count(*) as review_count'), DB::raw('avg(rating) as review_avg'))->first();
+        
+        return response()->json(["data" => $data], 200);
     }
 }
