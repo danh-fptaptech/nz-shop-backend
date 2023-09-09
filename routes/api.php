@@ -15,6 +15,7 @@ use App\Http\Controllers\PageController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SliderController;
 use App\Http\Controllers\Description\DescriptionController;
+use App\Http\Controllers\GoogleController;
 
 /*
 |--------------------------------------------------------------------------
@@ -103,6 +104,8 @@ Route::get("/sku", [ProductController::class, "generateSku"]);
 Route::get("/product-pagination", [ProductController::class, "getProductPagination"]);
 Route::delete("/products/delete/{id}", [ProductController::class, "deleteOneProduct"]);
 Route::post("/products/sku", [ProductController::class, "getOneProductBySku"]);
+Route::get("/out-stock", [ProductController::class, "outStock"]);
+Route::get("/search-output/{input}", [ProductController::class, "getSearchOutput"]);
 // Route::get("/products/{id}/reviews", [ProductController::class, "getAllReviews"]);
 
 Route::get("/categories", [CategoryController::class, "getAllCategories"]);
@@ -160,3 +163,7 @@ Route::post("/sliders", [SliderController::class, "store"]);
 Route::get("/sliders/{id}", [SliderController::class, "getOneSlider"]);
 Route::put("/sliders/edit/{id}", [SliderController::class, "update"]);
 Route::delete("/sliders/delete/{id}", [SliderController::class, "delete"]);
+
+// Google Sign In
+Route::post('/get-google-sign-in-url/{provider}', [GoogleController::class, 'getGoogleSignInUrl']);
+Route::get('/login/{provider}/callback', [GoogleController::class, 'loginCallback']);
