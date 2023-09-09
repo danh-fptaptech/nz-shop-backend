@@ -2,10 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
@@ -56,6 +54,7 @@ class RoleController extends Controller
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //
+
     public function updateRole(Request $request, $id): \Illuminate\Http\JsonResponse
     {
         try {

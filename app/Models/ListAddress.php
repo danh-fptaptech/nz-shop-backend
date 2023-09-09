@@ -11,6 +11,7 @@ class ListAddress extends Model
     protected $fillable = [
         'user_id',
         'name',
+        'phone_number',
         'address',
         'ward',
         'district',

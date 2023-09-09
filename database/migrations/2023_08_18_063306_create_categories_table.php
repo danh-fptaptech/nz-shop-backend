@@ -20,7 +20,7 @@ return new class extends Migration
             $table->unsignedBigInteger('parent_category_id')->nullable();
             $table->string('icon')->nullable();
             $table->boolean('is_brand')->default(false);
-            $table->boolean('is_deleted')->default(false);
+            $table->boolean('is_disabled')->default(false);
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
         });

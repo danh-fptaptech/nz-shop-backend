@@ -177,7 +177,6 @@ return [
         App\Providers\EventServiceProvider::class,
         Spatie\Permission\PermissionServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
-        Intervention\Image\ImageServiceProvider::class,
     ])->toArray(),
 
     /*

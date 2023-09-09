@@ -21,13 +21,13 @@ class UserController extends Controller
         $new = User::whereDate('created_at', $today)->count();
         $active = User::whereNotNull('email_verified_at')->count();
         $pending = User::whereNull('email_verified_at')->count();
-        $suspended = User::where('suspended', 'disable')->count();
+        $status = User::where('status', 'disable')->count();
         return response()->json([
             'total' => $totalUsers,
             'new' => $new,
             'active' => $active,
             'pending' => $pending,
-            'suspended' => $suspended
+            'status' => $status
         ]);
     }
 
@@ -47,20 +47,38 @@ class UserController extends Controller
                 "email" => $user->email,
                 "role" => $user->roles->implode('name', ', '),
                 "isVerify" => $user->email_verified_at ? 'Verified' : 'Pending',
-                "isSuspended" => $user->suspended
+                "status" => $user->status
             ];
         });
 
         return response()->json($formattedUsers);
     }
-
+//    public function getListUser(Request $request): \Illuminate\Http\JsonResponse
+//    {
+//        $usersQuery = User::with('roles:id,name');
+//        $totalData = $usersQuery->count();
+//        $dataGet = $usersQuery->paginate($request->input('dataInPer') ?: 10);
+//
+//        $formattedUsers = $dataGet->map(function ($user) {
+//            return [
+//                "id" => $user->id,
+//                "full_name" => $user->full_name,
+//                "phone_number" => $user->phone_number,
+//                "email" => $user->email,
+//                "role" => $user->roles->implode('name', ', '),
+//                "isVerify" => $user->email_verified_at ? 'Verified' : 'Pending',
+//                "status" => $user->status
+//            ];
+//        });
+//        return response()->json(['data'=>$formattedUsers,'totalItems'=>$totalData]);
+//    }
     //
     //////////////////////////////////////////////////////////////////////////
     //
     public function getListUserByQuery(Request $request): \Illuminate\Http\JsonResponse
     {
         $query = $request->input('query');
-        $users = User::where('suspended', 'active')
+        $users = User::where('status', 'active')
             ->Where('email', 'like', "%$query%")
             ->get(['email']);
         return response()->json($users);
@@ -70,7 +88,15 @@ class UserController extends Controller
     //////////////////////////////////////////////////////////////////////////
     //
 
-    // Tâm chèn code 
+    public function fetchUser(Request $request){
+        $user = $request->user();
+    }
+
+    //
+    //////////////////////////////////////////////////////////////////////////
+    //
+
+    // Tâm chèn code
 
     public function getAllUsers()
     {

@@ -1,9 +1,12 @@
 <?php
 
+use App\Http\Controllers\API_PROXY_GHTK;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CouponController;
+use App\Http\Controllers\GenerateImageController;
 use App\Http\Controllers\ListAddressController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\SiteSettingController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Product\ProductController;
 use App\Http\Controllers\Product\CategoryController;
@@ -30,6 +33,8 @@ use App\Http\Controllers\Comment\ProductFeedbackController;
 */
 
 
+//_____________________________________________________________________
+//  Public
 Route::post('register', [AuthController::class, 'register']);
 Route::post('verify-email', [AuthController::class, 'verify'])->name('verification.verify');
 Route::post('login', [AuthController::class, 'login']);
@@ -37,24 +42,32 @@ Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
 Route::post('reset-password', [AuthController::class, 'resetPassword'])->name('password.reset');
 //Route::get('isAdmin', [AuthController::class, 'isAdmin']);
 
-Route::middleware('auth:api')->get('isLogin', [AuthController::class, 'isLogin']);
+Route::get('fetchPublicDSetting', [SiteSettingController::class, 'fetchPublicDSetting']);
+Route::get('isLogin', [AuthController::class, 'isLogin']);
 Route::middleware('auth:api')->get('isAdmin', [AuthController::class, 'isAdmin']);
+Route::post('getValueByCode', [CouponController::class, 'getValueByCode']);
+Route::get('verSetting', [SiteSettingController::class, 'verSetting']);
+Route::get('fetchPublicSetting', [SiteSettingController::class, 'fetchPublicSetting']);
+//Route::get('/generateImage/{width}/{height}/{background}/{text}', [GenerateImageController::class, 'generate']);
+Route::post('API_PROXY_GHTK', [API_PROXY_GHTK::class, 'index']);
 
-
-//Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-//    return $request->user();
-//});
 
 Route::middleware('auth:sanctum')->group(function () {
-    //  User Controller
+    //_____________________________________________________________________
+    //Function - Global - Auth
     Route::get('logout', [AuthController::class, 'logout']);
+
+    //_____________________________________________________________________
+    //  User Controller
     Route::get('reSentVerify', [AuthController::class, 'reSentVerify']);
     Route::post('createUser', [AuthController::class, 'createUser']);
     Route::put('updateUser/{id}', [AuthController::class, 'updateUser']);
     Route::put('changeStatusUser/{id}', [AuthController::class, 'changeStatusUser']);
     Route::get('users/{id}', [AuthController::class, 'infoUserID']);
     Route::post('searchUsers', [UserController::class, 'getListUserByQuery']);
+    Route::get('getListUser', [UserController::class, 'getListUser']);
 
+    //_____________________________________________________________________
     //  Role Controller
     Route::post('createRole', [RoleController::class, 'createRole']);
     Route::post('createRoleWithPermissions', [RoleController::class, 'createRoleWithPermissions']);
@@ -65,16 +78,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('setPermission', [RoleController::class, 'setPermission']);
     Route::get('listRoles', [RoleController::class, 'listRoles']);
     Route::get('listPermissions', [RoleController::class, 'listPermissions']);
-    //    Route::post('assignRole', [RoleController::class, 'assignRole']);
-    //    Route::post('removeRole', [RoleController::class, 'removeRole']);
-    //    Route::post('setRole', [RoleController::class, 'setRole']);
-    //    Route::post('unsetRole', [RoleController::class, 'unsetRole']);
 
+    //_____________________________________________________________________
     //    Statistics
-
     Route::get('userStats', [UserController::class, 'userStats']);
-    Route::get('getListUser', [UserController::class, 'getListUser']);
 
+
+    //_____________________________________________________________________
     //    Manager Coupon
     Route::post('createCoupon', [CouponController::class, 'createCoupon']);
     Route::get('generateUniqueCode', [CouponController::class, 'generateUniqueCode']);
@@ -82,17 +92,31 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('changeStatusCoupon/{id}', [CouponController::class, 'changeStatusCoupon']);
     Route::post('deleteCoupon', [CouponController::class, 'deleteCoupon']);
     Route::put('updateCoupon/{id}', [CouponController::class, 'updateCoupon']);
-    Route::get('getValueByCode/{code}', [CouponController::class, 'getValueByCode']);
-    //
+
+    //_____________________________________________________________________
     //    Manager ListAddress
     Route::post('createAddress', [ListAddressController::class, 'createAddress']);
     Route::get('showListAddressOfUser', [ListAddressController::class, 'showListAddressOfUser']);
     Route::get('getOneAddressOfUserByID/{id}', [ListAddressController::class, 'getOneAddressOfUserByID']);
     Route::put('editAddressByID/{id}', [ListAddressController::class, 'editAddressByID']);
-});
-// Long 
-Route::post("/description", [DescriptionController::class, "storeImageUpload"]);
 
+
+    //_____________________________________________________________________
+    //    Site Setting
+    Route::post('createOne', [SiteSettingController::class, 'createOne']);
+    Route::put('updateSetting', [SiteSettingController::class, 'updateSetting']);
+    Route::post('getSecretKey', [SiteSettingController::class, 'getSecretKey']);
+    Route::get('newSecretKey', [SiteSettingController::class, 'newSecretKey']);
+    Route::get('newIdApp', [SiteSettingController::class, 'newIdApp']);
+    Route::get('fetchGSetting', [SiteSettingController::class, 'fetchGSetting']);
+    Route::get('fetchMSetting', [SiteSettingController::class, 'fetchMSetting']);
+    Route::get('fetchSSetting', [SiteSettingController::class, 'fetchSSetting']);
+    Route::get('fetchSEOSetting', [SiteSettingController::class, 'fetchSEOSetting']);
+    Route::get('fetchDSetting', [SiteSettingController::class, 'fetchDSetting']);
+});
+// Long
+Route::post("/description", [DescriptionController::class, "storeImageUpload"]);
+Route::get("/products/name/{name}", [ProductController::class, "getProductsByName"]);
 Route::get("/products", [ProductController::class, "getAllProducts"]);
 Route::get("/randomProducts", [ProductController::class, "randomProducts"]);
 Route::post("/products", [ProductController::class, "createOneProduct"]);
@@ -104,23 +128,24 @@ Route::get("/products/{id}/comments", [ProductController::class, "getAllComments
 Route::get("/sku", [ProductController::class, "generateSku"]);
 Route::get("/product-pagination", [ProductController::class, "getProductPagination"]);
 Route::delete("/products/delete/{id}", [ProductController::class, "deleteOneProduct"]);
+Route::post("/products/sku", [ProductController::class, "getOneProductBySku"]);
 Route::get("/products/{id}/reviews", [ProductController::class, "getAllReviews"]);
 
 Route::get("/categories", [CategoryController::class, "getAllCategories"]);
 Route::post("/categories", [CategoryController::class, "createOneCategory"]);
 Route::put("/categories/delete/{id}", [CategoryController::class, "deleteOneCategory"]);
-Route::put("/categories/delete-recursively/{id}", [CategoryController::class, "deleteRecursiveCategories"]);
-Route::put("/categories/recover/{id}", [CategoryController::class, "recoverOneCategory"]);
-Route::put("/categories/recover-recursively/{id}", [CategoryController::class, "recoverRecursiveCategories"]);
+Route::put("/categories/disable/{id}", [CategoryController::class, "disableRecursiveCategories"]);
+Route::put("/categories/enable/{id}", [CategoryController::class, "enableRecursiveCategories"]);
 Route::get("/categories/{id}", [CategoryController::class, "getSubCategories"]);
 Route::put("/categories/update/{id}", [CategoryController::class, "updateOneCategory"]);
 Route::get("/recursive-categories/{id}/products/{numbers?}", [CategoryController::class, "getProductsByRecursiveCategoryId"]);
 Route::get("/recursive-categories/{id}", [CategoryController::class, "getRecursiveCategories"]);
 
-//Tam 
+//Tam
 Route::get("/users", [UserController::class, "getAllUsers"]);
 
 // Route::get("/posts", [PostController::class, "getAllPosts"]);
+Route::get("/posts/{id}/comments", [PostController::class, "getAllComments"]);
 
 Route::get("/reviews", [ReviewController::class, "getAllReviews"]);
 Route::post("/reviews", [ReviewController::class, "createOneReview"]);
@@ -144,7 +169,7 @@ Route::get("/product-comments/{id}/product-feedbacks", [ProductCommentController
 Route::get("/product-comment-pagination", [ProductCommentController::class, "getCommentPagination"]);
 Route::get("/product-comment-pagination/{id}/feedback", [ProductCommentController::class, "getFeedbackCommentPagination"]);
 
-//feedback 
+//feedback
 Route::put("/product-feedbacks/toggle/{id}", [ProductFeedbackController::class, "toggleApproveOneCommentProduct"]);
 Route::put("/post-feedbacks/toggle/{id}", [PostFeedbackController::class, "toggleApproveOneCommentProduct"]);
 Route::delete("/product-feedbacks/delete/{id}", [ProductFeedbackController::class, "deleteOneCommentProduct"]);
@@ -157,7 +182,6 @@ Route::get("/posts/{title}", [PostController::class, "getPost"]);
 Route::put("/posts/edit/{id}", [PostController::class, "update"]);
 Route::delete("/posts/delete/{id}", [PostController::class, "delete"]);
 Route::get("/randomPosts", [PostController::class, "randomPost"]);
-Route::get("/posts/{id}/comments", [PostController::class, "getAllComments"]);
 
 Route::get("/pages", [PageController::class, "index"]);
 Route::post("/pages", [PageController::class, "store"]);
