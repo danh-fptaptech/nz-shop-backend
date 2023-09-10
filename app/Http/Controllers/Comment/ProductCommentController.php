@@ -35,6 +35,19 @@ class ProductCommentController extends Controller
     }
 
     public function createOneCommentProduct(Request $request) {
+        $hello = DB::table("a")->where("a", "like", "keyword")->first();
+        
+        $keywordArr = explode(",", $hello->value);
+        $wordArr = explode(" ", $request->comment);
+        
+        if (count(array_intersect($keywordArr, $wordArr)) > 0) {
+            return response()->json([
+                    "status" => "error",
+                    "message" => "Binh luan chua tu nhay cam!",
+                ],
+            400);
+        }
+
         $comment = Product_comment::create($request->all());
         if ($comment) {
             return response()->json(
