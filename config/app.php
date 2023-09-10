@@ -26,6 +26,11 @@ return [
 
     'vue_api_key' => env('VUE_API_KEY'),
 
+    //content
+    'content_api_key' => env('CONTENT_API_KEY'),
+    'content_plan_id' => env('CONTENT_PLAN_ID'),
+    'tool_id' => env('TOOL_ID'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Environment

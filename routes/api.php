@@ -130,6 +130,7 @@ Route::get("/product-pagination", [ProductController::class, "getProductPaginati
 Route::delete("/products/delete/{id}", [ProductController::class, "deleteOneProduct"]);
 Route::post("/products/sku", [ProductController::class, "getOneProductBySku"]);
 Route::get("/products/{id}/reviews", [ProductController::class, "getAllReviews"]);
+Route::post("/content", [ProductController::class, "generateContentByAI"]);
 
 Route::get("/categories", [CategoryController::class, "getAllCategories"]);
 Route::post("/categories", [CategoryController::class, "createOneCategory"]);
@@ -182,6 +183,7 @@ Route::get("/posts/{title}", [PostController::class, "getPost"]);
 Route::put("/posts/edit/{id}", [PostController::class, "update"]);
 Route::delete("/posts/delete/{id}", [PostController::class, "delete"]);
 Route::get("/randomPosts", [PostController::class, "randomPost"]);
+Route::post("/content", [PostController::class, "generateAIContent"]);
 
 Route::get("/pages", [PageController::class, "index"]);
 Route::post("/pages", [PageController::class, "store"]);
