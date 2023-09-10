@@ -3,7 +3,12 @@
 namespace App\Http\Controllers\Comment;
 
 use App\Http\Controllers\Controller;
+use App\Models\Post_comment;
+use App\Models\Post_feedback;
 use App\Models\Product_comment;
+use App\Models\Product_feedback;
+use App\Models\Review;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -103,6 +108,20 @@ class ProductCommentController extends Controller
         return response()->json(["data" => $product, "message" => "success"], 200); 
     }
 
+    public function commentToday() {
+        $today = Carbon::today();
+        $productcommenttoday = Product_comment::whereDate('created_at', $today)->count();
+        $productfeedbackstoday =Product_feedback::whereDate('created_at', $today)->count();
+
+        $postcommenttoday = Post_comment::whereDate('created_at', $today)->count();
+        $postfeedbackstoday =Post_feedback::whereDate('created_at', $today)->count();
+
+        $reivewtoday = Review::whereDate('created_at', $today)->count();
+
+        return response()->json(["todayPostComment" => $postcommenttoday + $postfeedbackstoday,"todayProductComment" => $productcommenttoday +  $productfeedbackstoday, "todayReview"=> $reivewtoday ,"message" => "success"], 200); 
+    }
+    
+
     public function getCommentPagination() {
         $comments = DB::table('product_comments')
         ->join('users', 'users.id', '=', 'product_comments.user_id')
@@ -112,7 +131,7 @@ class ProductCommentController extends Controller
         'users.full_name', 'products.name as product_name', DB::raw('count(product_feedbacks.id) as feedback_count'),
         DB::raw('count(CASE WHEN product_feedbacks.is_approved <> 1 THEN 1 END) as pending_feedback_count'))
         ->groupBy('products.slug','product_comments.id', 'product_comments.comment', 'users.full_name', 'product_name', 
-        'product_comments.is_approved', 'product_comments.created_at');
+        'product_comments.is_approved', 'product_comments.created_at')->orderBy('product_comments.created_at', 'DESC');
         
 
         if (request()->query('is_approved')) {
@@ -126,13 +145,17 @@ class ProductCommentController extends Controller
         return response()->json(["data" => [
             "comments" => $comments->items(),
             "numberOfPages" => $comments->lastPage(),
+
+
         ]], 200);
+
     }
 
     public function getFeedbackCommentPagination($id) {
         $feedbacks = Product_comment::find($id)->product_feedbacks()
         ->join('users', 'users.id', '=', 'product_feedbacks.user_id')
-        ->select('product_feedbacks.*', 'users.full_name');
+        ->select('product_feedbacks.*', 'users.full_name')
+        ->orderBy('product_feedbacks.created_at', 'DESC');
 
         if (request()->query('is_approved')) {
             $feedbacks = $feedbacks->where('is_approved', '=', request()->boolean('is_approved'));

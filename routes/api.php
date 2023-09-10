@@ -150,6 +150,9 @@ Route::get("/wishlists", [WishlistController::class, "getAllWishlists"]);
 Route::get("/wishlist/{id}", [WishlistController::class, "getAllWishlistById"]);
 Route::post("/wishlists", [WishlistController::class, "addOrRemove"]);
 
+//demtheongay
+Route::get("/commentToday", [ProductCommentController::class, "commentToday"]);
+
 //feedback 
 Route::put("/product-feedbacks/toggle/{id}", [ProductFeedbackController::class, "toggleApproveOneCommentProduct"]);
 Route::put("/post-feedbacks/toggle/{id}", [PostFeedbackController::class, "toggleApproveOneCommentProduct"]);

@@ -19,6 +19,7 @@ class PostCommentController extends Controller
         DB::raw('count(CASE WHEN post_feedbacks.is_approved <> 1 THEN 1 END) as pending_feedback_count'))
         ->groupBy('post_comments.id', 'post_comments.comment', 'users.full_name', 'post_title', 
         'post_comments.is_approved', 'post_comments.created_at')
+        ->orderBy('post_comments.created_at', 'DESC')
         ->get();
             
         if ($comments->count() > 0) {
@@ -35,6 +36,18 @@ class PostCommentController extends Controller
     }
 
     public function createOneComment(Request $request) {
+        $hello = DB::table("a")->where("a", "like", "keyword")->first();
+        
+        $keywordArr = explode(",", $hello->value);
+        $wordArr = explode(" ", $request->comment);
+        
+        if (count(array_intersect($keywordArr, $wordArr)) > 0) {
+            return response()->json([
+                    "status" => "error",
+                    "message" => "Binh luan chua tu nhay cam!",
+                ],
+            400);
+        }
         $comment = Post_comment::create($request->all());
         if ($comment) {
             return response()->json(
@@ -99,7 +112,8 @@ class PostCommentController extends Controller
         'users.full_name', 'posts.title as post_title', DB::raw('count(post_feedbacks.id) as feedback_count'),
         DB::raw('count(CASE WHEN post_feedbacks.is_approved <> 1 THEN 1 END) as pending_feedback_count'))
         ->groupBy('post_comments.id', 'post_comments.comment', 'users.full_name', 'post_title', 
-        'post_comments.is_approved', 'post_comments.created_at');
+        'post_comments.is_approved', 'post_comments.created_at')
+        ->orderBy('post_comments.created_at', 'DESC');
 
         if (request()->query('is_approved')) {
             $comments = $comments->where('post_comments.is_approved', '=', request()->boolean('is_approved'));
@@ -118,7 +132,8 @@ class PostCommentController extends Controller
     public function getFeedbackCommentPagination($id) {
         $feedbacks = Post_comment::find($id)->post_feedbacks()
         ->join('users', 'users.id', '=', 'post_feedbacks.user_id')
-        ->select('post_feedbacks.*', 'users.full_name');
+        ->select('post_feedbacks.*', 'users.full_name')
+        ->orderBy('post_feedbacks.created_at', 'DESC');
 
         if (request()->query('is_approved')) {
             $feedbacks = $feedbacks->where('is_approved', '=', request()->boolean('is_approved'));
