@@ -33,7 +33,7 @@ class CategoryController extends Controller
             ];
 
     public function getAllCategories() {
-        $categories = Category::all();
+        $categories = Category::where('is_disabled', false)->get();
         if ($categories->count() > 0) {
             return response()->json(
                 [
@@ -169,7 +169,7 @@ class CategoryController extends Controller
     }
 
     public function getSubCategories($id) {
-        $childCategories = Category::where("parent_category_id", $id)->get();
+        $childCategories = Category::where("parent_category_id", $id)->where("is_disabled", false)->get();
 
         if ($childCategories->count() > 0) {
             return response()->json(

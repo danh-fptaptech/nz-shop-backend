@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Product;
 
 use App\Models\Product;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
@@ -27,8 +26,8 @@ class ProductController extends Controller
         'origin_price' => 'bail|required|numeric',
         'sell_price' => 'bail|required|numeric|gte:origin_price',
         'discount_price' => 'bail|numeric|lt:sell_price|nullable',
-        "start_date" => 'bail|required_with:discount_price|date',
-        "end_date" => "bail|required_with:discount_price|date|after:start_date",
+        "start_date" => 'date',
+        "end_date" => "bail|date|after:start_date",
     ];
 
     private $variantRules = [
@@ -36,8 +35,8 @@ class ProductController extends Controller
         'originPrice' => 'numeric',
         'sellPrice' => 'bail|numeric|gte:originPrice',
         'discountPrice' => 'bail|numeric|lt:sellPrice|nullable',
-        "startDate" => 'bail|required_with:discountPrice|date',
-        "endDate" => "bail|required_with:discountPrice|date|after:startDate",
+        "startDate" => 'date',
+        "endDate" => "bail|date|after:startDate",
     ];
 
     private $productUpdateRules = [
@@ -85,7 +84,7 @@ class ProductController extends Controller
 
     public function getAllProducts()
     {
-        $products = Product::all();
+        $products = Product::where('is_disabled', false)->get();
 
         if ($products->count() > 0) {
             return response()->json(
@@ -361,7 +360,6 @@ class ProductController extends Controller
 
     public function getOneProductBySlug($slug)
     {
-        error_log($slug);
         $product = Product::where('slug', 'like', $slug)->first();
         return response()->json(["status" => "ok", "data" => $product], 200);
     }
@@ -410,15 +408,8 @@ class ProductController extends Controller
 
     public function getProductsByName($name) {
         $products = Product::where('name', 'like', "%$name%")->get();
-
         if ($products->count() > 0) {
-            $formattedUsers = $products->map(function ($item) {
-            return [
-                "id" => $item->id,
-                "name" => $item->name,
-            ];
-        });
-            return response()->json(["message" => "OK!", "data" => $formattedUsers], 200);
+            return response()->json(["message" => "OK!", "data" => $products], 200);
         }
     }
 
@@ -484,6 +475,7 @@ class ProductController extends Controller
         ->select("reviews.*", "users.full_name")
         ->get();
         return response()->json([
+            "status" => "ok",
             "message" => "success",
             "data" => $reviews,
         ], 200);
@@ -582,5 +574,27 @@ class ProductController extends Controller
     private function codeExists($code)
     {
         return Product::where('sku', $code)->exists();
+    }
+
+    public function outStock() {
+        $products = Product::where("quantity", "<", 10)->where("is_disabled", "like", false)->get();
+
+        return response()->json(["data" => [
+            "products" => $products,
+            "count" => $products->count(),
+        ]], 200);
+    }
+
+    public function getSearchOutput($input) {
+        $products = Product::where("name", "like", "%$input%")->limit(3)->get();
+
+        return response()->json(["data" => $products], 200);
+    }
+
+    public function getAverageReview($id) {
+
+        $data = Product::find($id)->reviews()->select(DB::raw('count(*) as review_count'), DB::raw('avg(rating) as review_avg'))->first();
+
+        return response()->json(["data" => $data], 200);
     }
 }

@@ -134,7 +134,10 @@ Route::get("/sku", [ProductController::class, "generateSku"]);
 Route::get("/product-pagination", [ProductController::class, "getProductPagination"]);
 Route::delete("/products/delete/{id}", [ProductController::class, "deleteOneProduct"]);
 Route::post("/products/sku", [ProductController::class, "getOneProductBySku"]);
-Route::get("/products/{id}/reviews", [ProductController::class, "getAllReviews"]);
+Route::get("/out-stock", [ProductController::class, "outStock"]);
+Route::get("/search-output/{input}", [ProductController::class, "getSearchOutput"]);
+Route::get("/average-review/{id}", [ProductController::class, "getAverageReview"]);
+// Route::get("/products/{id}/reviews", [ProductController::class, "getAllReviews"]);
 
 Route::get("/categories", [CategoryController::class, "getAllCategories"]);
 Route::post("/categories", [CategoryController::class, "createOneCategory"]);
