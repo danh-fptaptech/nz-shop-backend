@@ -409,15 +409,8 @@ class ProductController extends Controller
 
     public function getProductsByName($name) {
         $products = Product::where('name', 'like', "%$name%")->get();
-        if ($products->count() > 0) {
-            $formattedUsers = $products->map(function ($item) {
-            return [
-                "id" => $item->id,
-                "name" => $item->name,
-            ];
-        });
-            return response()->json(["message" => "OK!", "data" => $formattedUsers], 200);
-        }
+       //sua
+        return response()->json(["message" => "OK!", "data" => $products], 200);
     }
 
     private function create_slug($string)
@@ -462,7 +455,7 @@ class ProductController extends Controller
         return $string;
     }
 
-    public function  omments($id)
+    public function getAllComments($id)
     {
         $product = Product::find($id);
         $comments = $product->comments()->join("users", "users.id", "=" , "product_comments.user_id")
@@ -640,12 +633,5 @@ class ProductController extends Controller
         $products = Product::where("name", "like", "%$input%")->limit(3)->get();
 
         return response()->json(["data" => $products], 200);
-    }
-
-    public function getAverageReview($id) {
-        
-        $data = Product::find($id)->reviews()->select(DB::raw('count(*) as review_count'), DB::raw('avg(rating) as review_avg'))->first();
-        
-        return response()->json(["data" => $data], 200);
     }
 }
