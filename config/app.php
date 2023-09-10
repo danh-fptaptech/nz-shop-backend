@@ -178,7 +178,6 @@ return [
         Spatie\Permission\PermissionServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
         Intervention\Image\ImageServiceProvider::class,
-        Laravel\Socialite\SocialiteServiceProvider::class,
     ])->toArray(),
 
     /*

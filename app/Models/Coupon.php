@@ -16,6 +16,7 @@ class Coupon extends Model
         'value',
         'type_value',
         'limit_time',
+        'products_id',
         'date_start',
         'date_end',
         'status',

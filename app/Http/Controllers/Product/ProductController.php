@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Product;
 
 use App\Models\Product;
 use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
@@ -72,6 +73,16 @@ class ProductController extends Controller
         "discountPrice.lt" => "Giá khuyến mãi phải nhỏ hơn giá bán!"
     ];
 
+    public function randomProducts()
+    {
+        $products = Product::where("is_disabled", 0)->get()->random(5);
+        return response()->json([
+        "status" => 200,
+        "data" => $products,
+        "message" => "Get random product successfully."
+        ], 200);
+    }
+
     public function getAllProducts()
     {
         $products = Product::where('is_disabled', false)->get();
@@ -102,7 +113,7 @@ class ProductController extends Controller
             $newKey = explode(".", $key)[0];
             $errors[$newKey] = $value[0];
         }
-        
+
         $variantsMessages = [];
         if ($request->has('variants')) {
             $variants = json_decode($request->variants);
@@ -122,7 +133,7 @@ class ProductController extends Controller
         })) {
              $errors["variants"] = $variantsMessages;
         }
-        
+
         if (count($errors) > 0) {
             return response()->json(
                 [
@@ -143,13 +154,13 @@ class ProductController extends Controller
         }
 
         $product->sku = $request->sku;
-        
+
         $product->slug = $this->create_slug($product->name);
         $product->description = $request->description;
         $product->quantity = $request->quantity;
         $product->origin_price = $request->origin_price;
         $product->sell_price = $request->sell_price;
-        
+
         if ($request->has("discount_price")) {
             $product->discount_price = $request->discount_price;
             $product->start_date = $request->start_date;
@@ -178,12 +189,12 @@ class ProductController extends Controller
             $product->gallery .= $imagePath;
         }
 
-        if ($request->has('variants')) { 
+        if ($request->has('variants')) {
             $product->variants = $request->variants;
         }
 
         $product->save();
- 
+
         return response()->json(
             [
                 "status" => "ok",
@@ -211,7 +222,7 @@ class ProductController extends Controller
     }
 
     public function updateOneProduct(Request $request, $id)
-    {   
+    {
         $product = Product::find($id);
         if ($product) {
             $validator = Validator::make($request->all(), [
@@ -224,8 +235,8 @@ class ProductController extends Controller
             'origin_price' => 'bail|required|numeric',
             'sell_price' => 'bail|required|numeric|gte:origin_price',
             'discount_price' => 'bail|numeric|lt:sell_price|nullable',
-            "start_date" => 'bail|required_with:discount_price|date',
-            "end_date" => "bail|required_with:discount_price|date|after:start_date",
+            "start_date" => 'date',
+            "end_date" => "bail|date|after:start_date",
         ], $this->productMessages);
 
         $errors = [];
@@ -233,7 +244,7 @@ class ProductController extends Controller
             $newKey = explode(".", $key)[0];
             $errors[$newKey] = $value[0];
         }
-        
+
         $variantsMessages = [];
         if ($request->has('variants')) {
             $variants = json_decode($request->variants);
@@ -253,7 +264,7 @@ class ProductController extends Controller
         })) {
              $errors["variants"] = $variantsMessages;
         }
-        
+
         if (count($errors) > 0) {
             return response()->json(
                 [
@@ -272,16 +283,16 @@ class ProductController extends Controller
                 $product->name = $request->name . $i;
                 $i++;
             }
-        }   
-        
+        }
+
         $product->sku = $request->sku;
-        
+
         $product->slug = $this->create_slug($product->name);
         $product->description = $request->description;
         $product->quantity = $request->quantity;
         $product->origin_price = $request->origin_price;
         $product->sell_price = $request->sell_price;
-        
+
         if ($request->has("discount_price")) {
             $product->discount_price = $request->discount_price;
             $product->start_date = $request->start_date;
@@ -313,7 +324,7 @@ class ProductController extends Controller
             $newGallery = $request->newGallery;
             $newGallerySet = new \Ds\Set(explode("|", $newGallery));
             $diffGallerySet = $oldGallerySet->diff($newGallerySet);
-            
+
             foreach ($diffGallerySet->toArray() as $file) {
                 Storage::delete("public/$file");
             }
@@ -332,12 +343,12 @@ class ProductController extends Controller
             }
         }
 
-        if ($request->has('variants')) { 
+        if ($request->has('variants')) {
             $product->variants = $request->variants;
         }
 
         $product->save();
- 
+
         return response()->json(
             [
                 "status" => "ok",
@@ -366,7 +377,7 @@ class ProductController extends Controller
         }
 
         if (request()->query("name")) {
-            $products = $products->where("name", "like", "%" . request()->query('name') . "%");      
+            $products = $products->where("name", "like", "%" . request()->query('name') . "%");
         }
 
         if (request()->query("per_page")) {
@@ -389,7 +400,7 @@ class ProductController extends Controller
             foreach (explode("|", $product->gallery) as $file) {
                 Storage::delete("public/$file");
             }
-            
+
             $product->delete();
 
             return response()->json(["status" => "ok", "message" => "Xoá sản phẩm thành công!"], 200);
@@ -399,7 +410,13 @@ class ProductController extends Controller
     public function getProductsByName($name) {
         $products = Product::where('name', 'like', "%$name%")->get();
         if ($products->count() > 0) {
-            return response()->json(["message" => "OK!", "data" => $products], 200);
+            $formattedUsers = $products->map(function ($item) {
+            return [
+                "id" => $item->id,
+                "name" => $item->name,
+            ];
+        });
+            return response()->json(["message" => "OK!", "data" => $formattedUsers], 200);
         }
     }
 
@@ -447,8 +464,10 @@ class ProductController extends Controller
 
     public function  omments($id)
     {
-        $comments = Product::find($id)->comments;
-
+        $product = Product::find($id);
+        $comments = $product->comments()->join("users", "users.id", "=" , "product_comments.user_id")
+        ->select("product_comments.*", "users.full_name")
+        ->get();
         return response()->json([
             "status" => "ok",
             "message" => "success",
@@ -458,10 +477,11 @@ class ProductController extends Controller
 
     public function getAllReviews($id)
     {
-        $reviews = Product::find($id)->reviews;
-
+        $product = Product::find($id);
+        $reviews = $product->reviews()->join("users", "users.id", "=" , "reviews.user_id")
+        ->select("reviews.*", "users.full_name")
+        ->get();
         return response()->json([
-            "status" => "ok",
             "message" => "success",
             "data" => $reviews,
         ], 200);
@@ -472,12 +492,12 @@ class ProductController extends Controller
         return response()->json(["data" => $this->generateUniqueCode()], 200);
     }
 
-    public function getOneProductBySku(Request $request) {
+    public function getOneProductBySku(Request $request): JsonResponse
+    {
         $sku = $request->sku;
-        
         $skuArr = explode('-', $sku);
         $product = Product::where('sku', 'like', $skuArr[0])
-        ->select('id', 'sku', 'name', 'sell_price', 'origin_price', 'discount_price', 'quantity', 'image', 'variants', 'start_date', 'end_date')
+        ->select('id', 'sku', 'name', 'slug','sell_price', 'origin_price', 'discount_price', 'quantity', 'image', 'variants', 'start_date', 'end_date')
         ->first();
 
         if ($product->count() === 0) {
@@ -505,7 +525,9 @@ class ProductController extends Controller
             return response()->json(["data" => [
                 "id" => $product->id,
                 "sku" => $sku,
+                "slug" => $product->slug,
                 "name" => $product->name,
+                "name_variant" => $variant->name,
                 "sell_price"=> $product->sell_price,
                 "origin_price"=> $product->origin_price,
                 "discount_price" => $product->discount_price,
@@ -519,6 +541,7 @@ class ProductController extends Controller
             return response()->json(["data" =>  [
                 "id" => $product->id,
                 "sku" => $sku,
+                "slug" => $product->slug,
                 "name" => $product->name,
                 "sell_price"=> $product->sell_price,
                 "origin_price"=> $product->origin_price,
@@ -550,7 +573,7 @@ class ProductController extends Controller
         for ($i = 1; $i < $length; $i++) {
             $code .= $characters[random_int(0, strlen($characters) - 1)];
         }
-     
+
         return $code;
     }
 
