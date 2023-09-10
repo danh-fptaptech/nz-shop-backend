@@ -17,6 +17,7 @@ use App\Http\Controllers\SliderController;
 use App\Http\Controllers\Description\DescriptionController;
 use App\Http\Controllers\Comment\PostFeedbackController;
 use App\Http\Controllers\Comment\ProductFeedbackController;
+use App\Http\Controllers\WishlistController;
 
 /*
 |--------------------------------------------------------------------------
@@ -143,6 +144,11 @@ Route::delete("/product-comments/delete/{id}", [ProductCommentController::class,
 Route::get("/product-comments/{id}/product-feedbacks", [ProductCommentController::class, "getAllProductFeedBacksById"]);
 Route::get("/product-comment-pagination", [ProductCommentController::class, "getCommentPagination"]);
 Route::get("/product-comment-pagination/{id}/feedback", [ProductCommentController::class, "getFeedbackCommentPagination"]);
+
+//Wish
+Route::get("/wishlists", [WishlistController::class, "getAllWishlists"]);
+Route::get("/wishlist/{id}", [WishlistController::class, "getAllWishlistById"]);
+Route::post("/wishlists", [WishlistController::class, "addOrRemove"]);
 
 //feedback 
 Route::put("/product-feedbacks/toggle/{id}", [ProductFeedbackController::class, "toggleApproveOneCommentProduct"]);
