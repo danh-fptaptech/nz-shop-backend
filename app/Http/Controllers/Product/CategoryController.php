@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class CategoryController extends Controller
 {
@@ -33,7 +34,7 @@ class CategoryController extends Controller
             ];
 
     public function getAllCategories() {
-        $categories = Category::all();
+        $categories = Category::where('is_disabled', false)->get();
         if ($categories->count() > 0) {
             return response()->json(
                 [
@@ -169,7 +170,7 @@ class CategoryController extends Controller
     }
 
     public function getSubCategories($id) {
-        $childCategories = Category::where("parent_category_id", $id)->get();
+        $childCategories = Category::where("parent_category_id", $id)->where("is_disabled", false)->get();
 
         if ($childCategories->count() > 0) {
             return response()->json(
@@ -258,6 +259,18 @@ class CategoryController extends Controller
         );
     }
 
+    public function getFinalProductsByRecursiveCategoryId($id, $numbers = null) {
+        $products = $this->getProductsByRecursiveCategoryId($id, $numbers);
+        foreach ($products as $product) {
+            $product->rating = $product->reviews()->avg('rating');
+            $product->ratingCount = $product->reviews()->count('rating');
+        }
+        return response()->json([
+            "data" =>  $products,
+            "message" => "Get successfully!"
+        ], 200);
+    }
+
     public function getProductsByRecursiveCategoryId($id, $numbers = null) {
         $firstCategoryArray = Category::find($id);
         $categories = $this->getRecursiveCategories($id)->push($firstCategoryArray);
@@ -268,10 +281,8 @@ class CategoryController extends Controller
         if ($numbers && $products->count() > (int) $numbers) {
             $products = $products->random($numbers);
         }
-        return response()->json([
-            "data" =>  $products,
-            "message" => "Get successfully!"
-        ], 200);
+
+        return $products;
     }
 
     public function getRecursiveCategories($id, &$result = new Collection) {
@@ -282,4 +293,26 @@ class CategoryController extends Controller
         }
         return $result;
     }
+
+     public function getCategoryPagination() {
+        $categories = DB::table('categories');
+
+        if (request()->query('is_disabled')) {
+            $categories = $categories->where('is_disabled', '=', request()->boolean('is_disabled'));
+        }
+
+        if (request()->query("name")) {
+            $categories = $categories->where("name", "like", "%" . request()->query('name') . "%");
+        }
+
+        if (request()->query("per_page")) {
+            $categories = $categories->paginate(request()->query("per_page"));
+        }
+
+        return response()->json(["data" => [
+            "categories" => $categories->items(),
+            "numberOfPages" => $categories->lastPage(),
+        ]], 200);
+    }
+
 }

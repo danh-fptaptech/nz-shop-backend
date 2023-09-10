@@ -20,6 +20,7 @@ use App\Http\Controllers\SliderController;
 use App\Http\Controllers\Description\DescriptionController;
 use App\Http\Controllers\Comment\PostFeedbackController;
 use App\Http\Controllers\Comment\ProductFeedbackController;
+use App\Http\Controllers\GoogleController;
 
 /*
 |--------------------------------------------------------------------------
@@ -129,6 +130,9 @@ Route::get("/sku", [ProductController::class, "generateSku"]);
 Route::get("/product-pagination", [ProductController::class, "getProductPagination"]);
 Route::delete("/products/delete/{id}", [ProductController::class, "deleteOneProduct"]);
 Route::post("/products/sku", [ProductController::class, "getOneProductBySku"]);
+Route::get("/out-stock", [ProductController::class, "outStock"]);
+Route::get("/search-output/{input}", [ProductController::class, "getSearchOutput"]);
+Route::get("/average-review/{id}", [ProductController::class, "getAverageReview"]);
 Route::get("/products/{id}/reviews", [ProductController::class, "getAllReviews"]);
 Route::post("/content", [ProductController::class, "generateContentByAI"]);
 
@@ -139,8 +143,9 @@ Route::put("/categories/disable/{id}", [CategoryController::class, "disableRecur
 Route::put("/categories/enable/{id}", [CategoryController::class, "enableRecursiveCategories"]);
 Route::get("/categories/{id}", [CategoryController::class, "getSubCategories"]);
 Route::put("/categories/update/{id}", [CategoryController::class, "updateOneCategory"]);
-Route::get("/recursive-categories/{id}/products/{numbers?}", [CategoryController::class, "getProductsByRecursiveCategoryId"]);
+Route::get("/recursive-categories/{id}/products/{numbers?}", [CategoryController::class, "getFinalProductsByRecursiveCategoryId"]);
 Route::get("/recursive-categories/{id}", [CategoryController::class, "getRecursiveCategories"]);
+Route::get("/category-pagination", [CategoryController::class, "getCategoryPagination"]);
 
 //Tam
 Route::get("/users", [UserController::class, "getAllUsers"]);
@@ -196,3 +201,7 @@ Route::post("/sliders", [SliderController::class, "store"]);
 Route::get("/sliders/{id}", [SliderController::class, "getOneSlider"]);
 Route::put("/sliders/edit/{id}", [SliderController::class, "update"]);
 Route::delete("/sliders/delete/{id}", [SliderController::class, "delete"]);
+
+// Google Sign In
+Route::post('/get-google-sign-in-url/{provider}', [GoogleController::class, 'getGoogleSignInUrl']);
+Route::get('/login/{provider}/callback', [GoogleController::class, 'loginCallback']);
