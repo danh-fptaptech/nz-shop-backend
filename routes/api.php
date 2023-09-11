@@ -3,11 +3,13 @@
 use App\Http\Controllers\API_PROXY_GHTK;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CouponController;
-use App\Http\Controllers\GenerateImageController;
+
+//use App\Http\Controllers\GenerateImageController;
 use App\Http\Controllers\ListAddressController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SiteSettingController;
+use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Product\ProductController;
 use App\Http\Controllers\Product\CategoryController;
@@ -41,8 +43,6 @@ Route::post('verify-email', [AuthController::class, 'verify'])->name('verificati
 Route::post('login', [AuthController::class, 'login']);
 Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
 Route::post('reset-password', [AuthController::class, 'resetPassword'])->name('password.reset');
-//Route::get('isAdmin', [AuthController::class, 'isAdmin']);
-
 Route::get('fetchPublicDSetting', [SiteSettingController::class, 'fetchPublicDSetting']);
 Route::get('isLogin', [AuthController::class, 'isLogin']);
 Route::middleware('auth:api')->get('isAdmin', [AuthController::class, 'isAdmin']);
@@ -52,9 +52,15 @@ Route::get('fetchPublicSetting', [SiteSettingController::class, 'fetchPublicSett
 //Route::get('/generateImage/{width}/{height}/{background}/{text}', [GenerateImageController::class, 'generate']);
 Route::post('API_PROXY_GHTK', [API_PROXY_GHTK::class, 'index']);
 
-    //_____________________________________________________________________
-    //    Oder
-    Route::post('createOrder',[OrderController::class,'createOrder']);
+
+//_____________________________________________________________________
+//    Oder Management
+Route::post('createOrder', [OrderController::class, 'createOrder']);
+Route::get('viewOrderbyID', [OrderController::class, 'viewOrderbyID']);
+Route::get('orderByCode/{code}', [OrderController::class, 'orderByCode']);
+Route::post('createStripePayment', [TransactionController::class, 'createStripePayment']);
+
+
 
 Route::middleware('auth:sanctum')->group(function () {
     //_____________________________________________________________________
@@ -62,7 +68,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('logout', [AuthController::class, 'logout']);
 
     //_____________________________________________________________________
-    //  User Controller
+    //  User Management
     Route::get('reSentVerify', [AuthController::class, 'reSentVerify']);
     Route::post('createUser', [AuthController::class, 'createUser']);
     Route::put('updateUser/{id}', [AuthController::class, 'updateUser']);
@@ -72,7 +78,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('getListUser', [UserController::class, 'getListUser']);
 
     //_____________________________________________________________________
-    //  Role Controller
+    //  Role Management
     Route::post('createRole', [RoleController::class, 'createRole']);
     Route::post('createRoleWithPermissions', [RoleController::class, 'createRoleWithPermissions']);
     Route::post('deleteRole', [RoleController::class, 'deleteRole']);
@@ -89,7 +95,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
     //_____________________________________________________________________
-    //    Manager Coupon
+    //    Management Coupon
     Route::post('createCoupon', [CouponController::class, 'createCoupon']);
     Route::get('generateUniqueCode', [CouponController::class, 'generateUniqueCode']);
     Route::get('getListCoupon', [CouponController::class, 'getListCoupon']);
@@ -98,7 +104,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('updateCoupon/{id}', [CouponController::class, 'updateCoupon']);
 
     //_____________________________________________________________________
-    //    Manager ListAddress
+    //    Management ListAddress
     Route::post('createAddress', [ListAddressController::class, 'createAddress']);
     Route::get('showListAddressOfUser', [ListAddressController::class, 'showListAddressOfUser']);
     Route::get('getOneAddressOfUserByID/{id}', [ListAddressController::class, 'getOneAddressOfUserByID']);
@@ -117,6 +123,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('fetchSSetting', [SiteSettingController::class, 'fetchSSetting']);
     Route::get('fetchSEOSetting', [SiteSettingController::class, 'fetchSEOSetting']);
     Route::get('fetchDSetting', [SiteSettingController::class, 'fetchDSetting']);
+
+    //_____________________________________________________________________
+    //    Order Management
+    Route::get('fetchListOrder', [OrderController::class, 'fetchListOrder']);
+
 
 });
 // Long
@@ -146,7 +157,8 @@ Route::put("/categories/disable/{id}", [CategoryController::class, "disableRecur
 Route::put("/categories/enable/{id}", [CategoryController::class, "enableRecursiveCategories"]);
 Route::get("/categories/{id}", [CategoryController::class, "getSubCategories"]);
 Route::put("/categories/update/{id}", [CategoryController::class, "updateOneCategory"]);
-Route::get("/recursive-categories/{id}/products/{numbers?}", [CategoryController::class, "getProductsByRecursiveCategoryId"]);
+Route::get("/recursive-categories/{id}/products/{numbers?}",
+    [CategoryController::class, "getProductsByRecursiveCategoryId"]);
 Route::get("/recursive-categories/{id}", [CategoryController::class, "getRecursiveCategories"]);
 
 //Tam
@@ -175,7 +187,8 @@ Route::put("/product-comments/toggle/{id}", [ProductCommentController::class, "t
 Route::delete("/product-comments/delete/{id}", [ProductCommentController::class, "deleteOneCommentProduct"]);
 Route::get("/product-comments/{id}/product-feedbacks", [ProductCommentController::class, "getAllProductFeedBacksById"]);
 Route::get("/product-comment-pagination", [ProductCommentController::class, "getCommentPagination"]);
-Route::get("/product-comment-pagination/{id}/feedback", [ProductCommentController::class, "getFeedbackCommentPagination"]);
+Route::get("/product-comment-pagination/{id}/feedback",
+    [ProductCommentController::class, "getFeedbackCommentPagination"]);
 
 //feedback
 Route::put("/product-feedbacks/toggle/{id}", [ProductFeedbackController::class, "toggleApproveOneCommentProduct"]);

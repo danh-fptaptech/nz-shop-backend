@@ -135,7 +135,7 @@ class AuthController extends Controller
 //
 ////////////////////////////////       Xử lý đăng nhập       /////////////////////////////////////////
 //
-    public function login(Request $request): \Illuminate\Http\JsonResponse
+    public function login(Request $request): JsonResponse
     {
         try {
             $request->validate([
@@ -167,7 +167,7 @@ class AuthController extends Controller
 //
 /////////////////////////////////       Xử lý đăng xuất      /////////////////////////////////////////
 //
-    public function logout(): \Illuminate\Http\JsonResponse
+    public function logout(): JsonResponse
     {
         try {
             $user = Auth::user();
@@ -359,7 +359,8 @@ class AuthController extends Controller
                 "email" => $user->email,
                 "role" => $user->roles->implode('name', ', '),
                 "verified" => $user->email_verified_at ? 'Verified' : 'Pending',
-                "status" => $user->status
+                "status" => $user->status,
+                "created_at" => $user->created_at
             ];
 
             return response()->json($formattedUser);

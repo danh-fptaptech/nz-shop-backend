@@ -18,16 +18,19 @@ class Order extends Model
         'address_shipping',
         'delivery',
     ];
-    public function user(): BelongsTo
+
+    public function users(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
+
     public function tracking(): HasOne
     {
-        return $this->hasOne(Tracking::class);
+        return $this->hasOne(Tracking::class, 'id');
     }
+
     public function transaction(): HasOne
     {
-        return $this->hasOne(Transaction::class);
+        return $this->hasOne(Transaction::class, 'id');
     }
 }

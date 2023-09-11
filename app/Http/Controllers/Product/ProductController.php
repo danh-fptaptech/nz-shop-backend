@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Product;
 
 use App\Models\Product;
 use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;

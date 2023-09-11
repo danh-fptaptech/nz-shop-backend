@@ -75,14 +75,14 @@ class User extends Authenticatable implements MustVerifyEmail
     }
     public function order(): HasMany
     {
-        return $this->hasMany(Order::class);
+        return $this->hasMany(Order::class, 'user_id');
     }
     public function tracking(): HasMany
     {
-        return $this->hasMany(Order::class);
+        return $this->hasMany(Tracking::class, 'user_id');
     }
     public function transaction(): HasMany
     {
-        return $this->hasMany(Order::class);
+        return $this->hasMany(Transaction::class, 'user_id');
     }
 }
