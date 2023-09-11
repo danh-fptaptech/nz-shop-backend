@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Validator;
 
+use function Laravel\Prompts\error;
+
 class PostController extends Controller
 {
   public function randomPost()
@@ -172,7 +174,7 @@ class PostController extends Controller
         if(File::exists( $post->image)){
           File::delete($post->image);
         }
-        
+        // Xử lý ảnh
         $image_64 = $request->image;
                     $extension = explode('/', explode(':', substr($image_64, 0, strpos($image_64, ';')))[1])[1];
                     $replace = substr($image_64, 0, strpos($image_64, ',') + 1);
@@ -223,7 +225,7 @@ class PostController extends Controller
 
 
   public function getAllComments($id)
-    {
+    { 
         $post = Post::find($id);
         $comments = $post->comments()->join("users", "users.id", "=" , "post_comments.user_id")
         ->select("post_comments.*", "users.full_name")
@@ -234,4 +236,49 @@ class PostController extends Controller
             "data" => $comments,
         ], 200);
     }
+
+  public function generateAIContent(Request $request) {
+    $api_key = config('app.content_api_key');
+    $plan_id = config('app.content_plan_id');
+    $tool_id = config('app.tool_id');
+    // return response()->json(["name" => $request->name, "description" => $request->description], 200);
+    $request_url = "https://nichesss.com/api/content-plans/$plan_id/append";
+
+    $request_options = array(
+        'http' => array(
+            'method' => 'POST',
+            'header' => 'Content-type: application/json' . "\r\n" .
+                        'Authorization: Bearer ' . $api_key . "\r\n",
+            'content' => "{\"tool_id\":\"$tool_id\",\"product_name\":\"$request->name\",\"product_desc\":\"$request->description\",\"tone\":\"professional\",\"language\":{\"id\":\"vi_VN\",\"formality\":\"more\"}}"
+        )
+    );
+
+    $request_context = stream_context_create($request_options);
+    $request_result = file_get_contents($request_url, false, $request_context);
+    $data = json_decode($request_result);
+
+    $queue_id = $data->queue_id;
+
+    $ch = curl_init();
+
+    curl_setopt($ch, CURLOPT_URL, "https://nichesss.com/api/content-plans/queue/$queue_id");
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
+
+    $headers = array();
+    $headers[] = 'Content-Type: application/json';
+    $headers[] = "Authorization: Bearer $api_key";
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+    $result = curl_exec($ch);
+    if (curl_errno($ch)) {
+        echo 'Error:' . curl_error($ch);
+    }
+    curl_close ($ch);
+
+    $data = (object) json_decode($result, true);
+
+    return response()->json(["data" => ((object) $data->content[0])->copy], 200);
+   
+  }
 }

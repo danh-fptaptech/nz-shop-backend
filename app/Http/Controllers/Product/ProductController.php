@@ -75,7 +75,7 @@ class ProductController extends Controller
 
     public function randomProducts()
     {
-        $products = Product::where("is_disabled", 0)->get()->random(5);
+        $products = Product::where("is_disabled", false)->get()->random(8);
         return response()->json([
         "status" => 200,
         "data" => $products,
@@ -235,8 +235,8 @@ class ProductController extends Controller
             'origin_price' => 'bail|required|numeric',
             'sell_price' => 'bail|required|numeric|gte:origin_price',
             'discount_price' => 'bail|numeric|lt:sell_price|nullable',
-            "start_date" => 'bail|required_with:discount_price|date',
-            "end_date" => "bail|required_with:discount_price|date|after:start_date",
+            "start_date" => 'date',
+            "end_date" => "bail|date|after:start_date",
         ], $this->productMessages);
 
         $errors = [];
@@ -409,9 +409,8 @@ class ProductController extends Controller
 
     public function getProductsByName($name) {
         $products = Product::where('name', 'like', "%$name%")->get();
-        if ($products->count() > 0) {
-            return response()->json(["message" => "OK!", "data" => $products], 200);
-        }
+       //sua
+        return response()->json(["message" => "OK!", "data" => $products], 200);
     }
 
     private function create_slug($string)
@@ -476,10 +475,54 @@ class ProductController extends Controller
         ->select("reviews.*", "users.full_name")
         ->get();
         return response()->json([
-            "status" => "ok",
             "message" => "success",
             "data" => $reviews,
         ], 200);
+    }
+
+    // Create product decription by AI technology
+    public function generateContentByAI(Request $request) {
+        $api_key = config('app.content_api_key');
+        $plan_id = config('app.content_plan_id');
+        $tool_id = config('app.tool_id');
+        // return response()->json(["name" => $request->name, "description" => $request->description], 200);
+        $request_url = "https://nichesss.com/api/content-plans/$plan_id/append";
+
+        $request_options = array(
+            'http' => array(
+                'method' => 'POST',
+                'header' => 'Content-type: application/json' . "\r\n" .
+                            'Authorization: Bearer ' . $api_key . "\r\n",
+                'content' => "{\"tool_id\":\"$tool_id\",\"product_name\":\"$request->name\",\"product_desc\":\"$request->description\",\"tone\":\"professional\",\"language\":{\"id\":\"vi_VN\",\"formality\":\"more\"}}"
+            )
+        );
+
+        $request_context = stream_context_create($request_options);
+        $request_result = file_get_contents($request_url, false, $request_context);
+        $data = json_decode($request_result);
+
+        $queue_id = $data->queue_id;
+
+        $ch = curl_init();
+
+        curl_setopt($ch, CURLOPT_URL, "https://nichesss.com/api/content-plans/queue/$queue_id");
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
+
+        $headers = array();
+        $headers[] = 'Content-Type: application/json';
+        $headers[] = "Authorization: Bearer $api_key";
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+        $result = curl_exec($ch);
+        if (curl_errno($ch)) {
+            echo 'Error:' . curl_error($ch);
+        }
+        curl_close ($ch);
+
+        $data = (object) json_decode($result, true);
+
+        return response()->json(["data" => ((object) $data->content[0])->copy], 200);
     }
 
     // sku
@@ -590,12 +633,5 @@ class ProductController extends Controller
         $products = Product::where("name", "like", "%$input%")->limit(3)->get();
 
         return response()->json(["data" => $products], 200);
-    }
-
-    public function getAverageReview($id) {
-
-        $data = Product::find($id)->reviews()->select(DB::raw('count(*) as review_count'), DB::raw('avg(rating) as review_avg'))->first();
-
-        return response()->json(["data" => $data], 200);
     }
 }
