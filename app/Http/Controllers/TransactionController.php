@@ -37,6 +37,10 @@ class TransactionController extends Controller
                 'currency' => 'VND',
                 'source' => $request->input('token'),
             ]);
+
+//            Check kết quả thực hiên xử lý sau khi giao dịch thành công....
+//            Chưa kịp viết tiếp.
+
             return response()->json($res['status']);
         } catch (\Exception $e) {
             return response()->json([
