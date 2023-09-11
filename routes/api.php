@@ -23,6 +23,7 @@ use App\Http\Controllers\SliderController;
 use App\Http\Controllers\Description\DescriptionController;
 use App\Http\Controllers\Comment\PostFeedbackController;
 use App\Http\Controllers\Comment\ProductFeedbackController;
+use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\GoogleController;
 
 /*
@@ -189,8 +190,15 @@ Route::put("/product-comments/toggle/{id}", [ProductCommentController::class, "t
 Route::delete("/product-comments/delete/{id}", [ProductCommentController::class, "deleteOneCommentProduct"]);
 Route::get("/product-comments/{id}/product-feedbacks", [ProductCommentController::class, "getAllProductFeedBacksById"]);
 Route::get("/product-comment-pagination", [ProductCommentController::class, "getCommentPagination"]);
-Route::get("/product-comment-pagination/{id}/feedback",
-    [ProductCommentController::class, "getFeedbackCommentPagination"]);
+Route::get("/product-comment-pagination/{id}/feedback", [ProductCommentController::class, "getFeedbackCommentPagination"]);
+
+//Wish
+Route::get("/wishlists", [WishlistController::class, "getAllWishlists"]);
+Route::get("/wishlist/{id}", [WishlistController::class, "getAllWishlistById"]);
+Route::post("/wishlists", [WishlistController::class, "addOrRemove"]);
+
+//demtheongay
+Route::get("/commentToday", [ProductCommentController::class, "commentToday"]);
 
 //feedback
 Route::put("/product-feedbacks/toggle/{id}", [ProductFeedbackController::class, "toggleApproveOneCommentProduct"]);

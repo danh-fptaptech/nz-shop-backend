@@ -85,4 +85,8 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(Transaction::class, 'user_id');
     }
+
+    public function wishlists(): \Illuminate\Database\Eloquent\Relations\HasMany {
+        return $this->hasMany(Wishlist::class);
+    }
 }

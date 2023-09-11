@@ -69,7 +69,8 @@ class ReviewController extends Controller
         $reviews = DB::table('reviews')
         ->join('users', 'users.id', '=', 'reviews.user_id')
         ->join('products', 'products.id', '=', 'reviews.product_id')
-        ->select('reviews.*','products.name','users.full_name','products.slug');
+        ->select('reviews.*','products.name','users.full_name','products.slug')
+        ->orderBy('reviews.created_at', 'DESC');
         
 
         if (request()->query('is_approved')) {
