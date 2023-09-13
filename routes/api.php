@@ -56,12 +56,27 @@ Route::post('API_PROXY_GHTK', [API_PROXY_GHTK::class, 'index']);
 
 
 //_____________________________________________________________________
-//    Oder Management
+//      Oder Management
 Route::post('createOrder', [OrderController::class, 'createOrder']);
 Route::get('viewOrderbyID', [OrderController::class, 'viewOrderbyID']);
 Route::get('orderByCode/{code}', [OrderController::class, 'orderByCode']);
-Route::post('createStripePayment', [TransactionController::class, 'createStripePayment']);
 
+//----------------------------------------------------------------------
+//      Transaction
+Route::post('createStripePayment', [TransactionController::class, 'createStripePayment']);
+Route::post('createVNPayLink', [TransactionController::class, 'createVNPayLink']);
+Route::post('runVNPay', [TransactionController::class, 'runVNPay']);
+Route::get('fetchListTransaction',[TransactionController::class,'fetchListTransaction']);
+
+
+Route::get('timenow', function () {
+    $data = [
+        'date' => now()->format('Y-m-d H:i:s:e'),
+        'timezone' => config('app.timezone'),
+        'timezoneOffset' => now()->format('P')
+    ];
+    return response()->json(['date'=>now(),'timezone'=>config('app.timezone'),'ket qua'=>$data,'time'=>time()]);
+});
 
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -83,7 +98,7 @@ Route::middleware('auth:sanctum')->group(function () {
     //  Role Management
     Route::post('createRole', [RoleController::class, 'createRole']);
     Route::post('createRoleWithPermissions', [RoleController::class, 'createRoleWithPermissions']);
-    Route::post('deleteRole', [RoleController::class, 'deleteRole']);
+    Route::delete('deleteRole', [RoleController::class, 'deleteRole']);
     Route::put('updateRole/{id}', [RoleController::class, 'updateRole']);
     Route::post('createPermission', [RoleController::class, 'createPermission']);
     Route::post('setRole', [RoleController::class, 'setRole']);
@@ -102,7 +117,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('generateUniqueCode', [CouponController::class, 'generateUniqueCode']);
     Route::get('getListCoupon', [CouponController::class, 'getListCoupon']);
     Route::put('changeStatusCoupon/{id}', [CouponController::class, 'changeStatusCoupon']);
-    Route::post('deleteCoupon', [CouponController::class, 'deleteCoupon']);
+    Route::delete('deleteCoupon', [CouponController::class, 'deleteCoupon']);
     Route::put('updateCoupon/{id}', [CouponController::class, 'updateCoupon']);
 
     //_____________________________________________________________________
@@ -111,6 +126,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('showListAddressOfUser', [ListAddressController::class, 'showListAddressOfUser']);
     Route::get('getOneAddressOfUserByID/{id}', [ListAddressController::class, 'getOneAddressOfUserByID']);
     Route::put('editAddressByID/{id}', [ListAddressController::class, 'editAddressByID']);
+    Route::delete('deleteAddress/{id}', [ListAddressController::class, 'deleteAddress']);
 
 
     //_____________________________________________________________________
@@ -126,9 +142,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('fetchSEOSetting', [SiteSettingController::class, 'fetchSEOSetting']);
     Route::get('fetchDSetting', [SiteSettingController::class, 'fetchDSetting']);
 
+
     //_____________________________________________________________________
     //    Order Management
     Route::get('fetchListOrder', [OrderController::class, 'fetchListOrder']);
+    Route::get('fetchOrdersOfUser', [OrderController::class, 'fetchOrdersOfUser']);
 
 
 });

@@ -1,13 +1,13 @@
 @component('mail::message')
-    # Chào bạn ,
+# Chào bạn ,
 
-    Dưới đây là thông tin tài khoản mới:
+Dưới đây là thông tin tài khoản mới:
 
-    - Tên đăng nhập: {{ $email }}
-    - Mật khẩu: {{ $password }}
+- Tên đăng nhập: {{ $email }}
+- Mật khẩu: {{ $password }}
 
-    Hãy đăng nhập vào hệ thống bằng thông tin trên.
+Hãy đăng nhập vào hệ thống bằng thông tin trên.
 
-    Cảm ơn,
-    {{ config('app.name') }}
+Cảm ơn,
+{{ config('app.name') }}
 @endcomponent

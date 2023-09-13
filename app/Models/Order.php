@@ -24,13 +24,13 @@ class Order extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function tracking(): HasOne
+    public function trackings(): BelongsTo
     {
-        return $this->hasOne(Tracking::class, 'id');
+        return $this->BelongsTo(Tracking::class, 'tracking_id');
     }
 
-    public function transaction(): HasOne
+    public function transactions(): BelongsTo
     {
-        return $this->hasOne(Transaction::class, 'id');
+        return $this->BelongsTo(Transaction::class, 'transaction_id');
     }
 }

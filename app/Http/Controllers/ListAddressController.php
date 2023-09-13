@@ -35,7 +35,7 @@ class ListAddressController extends Controller
             $addressCount = $request->user()->listAddresses()->count();
             if($addressCount>=5){
                 return response()->json([
-                    'status' => 'error', 'message' => "Bạn đã số địa chỉ tối đa: 5"
+                    'status' => 'error', 'message' => "Mỗi người chỉ được tối đa 5 địa chỉ"
                 ]);
             }
             $existingAddress = ListAddress::where('user_id', $request->user()->id)
@@ -126,6 +126,20 @@ class ListAddressController extends Controller
         } catch
         (\Exception $e) {
             return response()->json(['status' => 'error', 'message' => substr($e->getMessage(), 0, 150)]);
+        }
+    }
+
+    public function deleteAddress($id): \Illuminate\Http\JsonResponse
+    {
+        try {
+            $address = Auth::user()->listAddresses()->find($id);
+            $address->delete();
+            return response()->json(['status' => 'ok', 'message' => 'Xoá địa chỉ thành công']);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => substr($e->getMessage(), 0, 150)
+            ]);
         }
     }
 }

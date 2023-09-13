@@ -286,8 +286,9 @@ class AuthController extends Controller
 
     public function isLogin(): \Illuminate\Http\JsonResponse
     {
+        $user = Auth::guard('api')->user();
         if (Auth::guard('api')->check()) {
-            return response()->json(['isLogin' => true]);
+            return response()->json(['isLogin' => true,'status'=>$user->status]);
         } else {
             return response()->json(['isLogin' => false]);
         }

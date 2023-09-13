@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 
+use App\Mail\NewOrder;
 use App\Models\Coupon;
 use App\Models\Order;
 use App\Models\Product;
@@ -11,15 +12,14 @@ use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 class OrderController extends Controller
 {
     public function createOrder(Request $request): JsonResponse
     {
 
-
         $user = Auth::guard('api')->user();
-
 
 //        Kiểm tra còn hàng không
         foreach ($request->input('items') as $item) {
@@ -47,7 +47,6 @@ class OrderController extends Controller
             return $total + (floatval($price) * $product['quantity']);
         }, 0);
 //       Kiểm tra Coupon còn hiệu lực không
-        $dataCoupon = "";
         if ($request->input(['coupon'])) {
             $CouponController = new CouponController();
             $coupon = $CouponController->getValueByCode();
@@ -96,12 +95,11 @@ class OrderController extends Controller
         }
 //        End xử lý stock
 
+            $valueDiscount = 0;
+            $priceShipping = json_decode($order->delivery)->value;
 
-        $valueDiscount = 0;
-        $priceShipping = json_decode($order->delivery)->value;
 
-
-//      ->Tính phí ship khách hàng trả:
+//        ->Tính phí ship khách hàng trả:
 //        ->Nếu có mã coupon miễn phí vận chuyển:
         if ($request->input(['coupon']) && $typeVCoupon === 'free_shipping') {
             $valueDiscount = $priceShipping;
@@ -128,7 +126,7 @@ class OrderController extends Controller
 
         $calProfit = $totalValue - $costOfGoods - $valueDiscount;
 
-        $calTotalOrder = $totalValue - $valueDiscount + $priceShipping;
+        $calTotalOrder = $totalValue - $valueDiscount + json_decode($order->delivery)->value;
         $order->order_code = 'NZ'.Carbon::now()->format('dmy').'I'.$order->id;
         $order->total_value = $totalValue;
         $order->price_shipping = $priceShipping;
@@ -143,18 +141,30 @@ class OrderController extends Controller
             $order->coupon = $request->input(['coupon']);
         }
         $order->save();
+        $linkcheckorder = config('app.url')."/check-order/".$order->order_code."?key=".md5($order->email_buyer);
+        Mail::to($order->email_buyer)->send(new NewOrder($linkcheckorder));
         return response()->json([
-            'status' => "ok", 'message' => "Nhận dữ liệu thành công", 'data' => $order->order_code
+            'status' => "ok", 'message' => "Tạo đơn hàng thành công", 'data' => $order->order_code
         ]);
     }
 
-    public function fetchListOrder(Request $request): JsonResponse
+    public function fetchListOrder(): JsonResponse
     {
-        $orders = Order::with('users', 'tracking', 'transaction');
-        $totalData = $orders->count();
-        $dataGet = $orders->paginate($request->input('dataInPer') ?? 10);
+        $orders = Order::with('users', 'trackings', 'transactions')->get();
 
-        return response()->json(['data' => $dataGet, 'totalItems' => $totalData]);
+        return response()->json($orders);
+    }
+    public function fetchOrdersOfUser(): JsonResponse
+    {
+        $user = request()->user();
+        $orders = Order::where('user_id', $user->id)
+            ->with('users', 'trackings', 'transactions')->orderByDesc('created_at');
+        $orderList = $orders->paginate(10);
+//        Tổng chi tiêu
+        $totalPay = array_reduce($orders->whereNotNull('transaction_id')->get()->toArray(), function ($total, $order) {
+            return $total + $order['total_order'];
+        }, 0);
+        return response()->json(['list'=>$orderList,'Total'=>$totalPay]);
     }
 
     public function orderByCode($code): JsonResponse
@@ -164,15 +174,15 @@ class OrderController extends Controller
         if($user){
             $keyhash = md5($user->email);
         }
-        $order = Order::where('order_code', $code)->first();
+        $order = Order::where('order_code', $code)->with('users', 'trackings', 'transactions')->first();
         if (!$order) {
             return response()->json(['status' => "error", 'message' => "Không tìm thấy đơn hàng có mã '$code'"]);
         }
         if ($user && $order->user_id && $order->user_id !== $user->id) {
             return response()->json(['status' => "error", 'message' => "Bạn không có quyền truy cập đơn hàng này"]);
         }
-        if($keyhash !== md5($order->email_buyer)){
-            return response()->json(['status' => "error", 'message' => "Bạn không có quyền truy cập đơn hàng này"]);
+        if($keyhash != md5($order->email_buyer)){
+            return response()->json(['status' => "error",'key1'=>$keyhash,'key2'=>md5($order->email_buyer), 'message' => "Bạn không có quyền truy cập đơn hàng này"]);
         }
 
         return response()->json(['data' => $order]);

@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Tracking extends Model
 {
@@ -16,8 +16,8 @@ class Tracking extends Model
         'status',
     ];
 
-    public function order(): HasOne
+    public function order(): BelongsTo
     {
-        return $this->HasOne(Order::class,'tracking_id');
+        return $this->belongsTo(Order::class,'tracking_id');
     }
 }

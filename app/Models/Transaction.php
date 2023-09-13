@@ -18,8 +18,8 @@ class Transaction extends Model
         'status',
     ];
 
-    public function order(): HasOne
+    public function order(): BelongsTo
     {
-        return $this->hasOne(Order::class,'transaction_id');
+        return $this->belongsTo(Order::class,'order_id');
     }
 }
