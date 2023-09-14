@@ -288,7 +288,7 @@ class AuthController extends Controller
     {
         $user = Auth::guard('api')->user();
         if (Auth::guard('api')->check()) {
-            return response()->json(['isLogin' => true,'status'=>$user->status]);
+            return response()->json(['isLogin' => true, 'status' => $user->status]);
         } else {
             return response()->json(['isLogin' => false]);
         }
@@ -443,5 +443,85 @@ class AuthController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Không tìm thấy tài khoản']);
         }
     }
+
+
+    public function updateUser1(Request $request, $id): \Illuminate\Http\JsonResponse
+    {
+        try {
+            $user = User::find($id);
+            if ($user) {
+                $validator = Validator::make($request->all(), [
+                    'full_name' => 'bail|required|regex:/([\p{L} ]+)$/u|min:2|max:150',
+                    'phone_number' => [
+                        'bail', 'required', 'string', 'min:10', 'max:11', Rule::unique('users')->ignore($user->id)
+                    ],
+                ], [
+                    'full_name.required' => 'Vui lòng nhập họ và tên',
+                    'full_name.regex' => 'Họ và tên chỉ bao gồm chữ cái',
+                    'full_name.min' => 'Họ và tên phải từ 2 ký tự trở lên',
+                    'full_name.max' => 'Họ và tên không vượt quá 150 ký tự',
+                    'phone_number.required' => 'Vui lòng nhập số điện thoại',
+                    'phone_number.min' => 'Không đúng định dạng số điện thoại',
+                    'phone_number.max' => 'Không đúng định dạng số điện thoại',
+                    'phone_number.unique' => 'Số điện thoại này đã sử dụng ở tài khoản khác',
+                ]);
+                if ($validator->fails()) {
+                    return response()->json([
+                        'status' => 'error', 'message' => implode(PHP_EOL, $validator->errors()->all())
+                    ]);
+                }
+
+                $user->full_name = $request->input('full_name');
+                $user->phone_number = $request->input('phone_number');
+                $user->save();
+                return response()->json(['status' => 'ok', 'message' => 'Cập nhật tài khoản thành công']);
+            } else {
+                return response()->json(['status' => 'error', 'message' => 'Không tìm thấy tài khoản']);
+            }
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => substr($e->getMessage(), 0, 150)]);
+        }
+
+    }
+
+    public function changePassword(Request $request, $id): \Illuminate\Http\JsonResponse
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'old_password' => "required",
+                'new_password' => 'bail|required|regex:/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()]).{8,20}$/'
+            ], [
+                'old_password' => "Password cũ không được để trống",
+                'new_password.required' => 'Password mới không được để trống',
+                'new_password.regex' => 'Password phải từ 8 -20 ký tự. Ít nhất 1 chữ thường, 1 chữ in hoa và 1 ký tự đặc biệt',
+            ]);
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => 'error', 'message' => implode(PHP_EOL, $validator->errors()->all())
+                ], 400);
+            }
+
+            $user = User::find($id);
+            if (Hash::check($request->input('old_password'), $user->password)) {
+                $user->password = Hash::make($request->input('new_password'));
+                $user->save();
+                return response()->json([
+                    'status' => "ok", 'message' => "Cập nhật thành công!",
+                ]);
+            }
+
+            return response()->json(['status' => 'error', 'message' => 'Mật khẩu cũ không khớp']);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => "error",
+                'message' => substr($e->getMessage(), 0, 150),
+            ]);
+        }
+    }
+
+
 }
+
+
 

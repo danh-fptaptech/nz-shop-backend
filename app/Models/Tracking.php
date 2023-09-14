@@ -18,6 +18,6 @@ class Tracking extends Model
 
     public function order(): BelongsTo
     {
-        return $this->belongsTo(Order::class,'tracking_id');
+        return $this->belongsTo(Order::class,'order_id');
     }
 }

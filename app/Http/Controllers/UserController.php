@@ -77,9 +77,11 @@ class UserController extends Controller
     public function getListUserByQuery(Request $request): \Illuminate\Http\JsonResponse
     {
         $query = $request->input('query');
-        $users = User::where('status', 'active')
-            ->Where('email', 'like', "%$query%")
-            ->get(['email']);
+        $users = User::with('roles:id,name')->where('status', 'active')
+            ->Where('full_name', 'like', "%$query%")
+            ->orWhere('email', 'like', "%$query%")
+            ->orWhere('phone_number', 'like', "%$query%")
+            ->get();
         return response()->json($users);
     }
 

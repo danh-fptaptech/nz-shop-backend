@@ -386,6 +386,25 @@ class SiteSettingController extends Controller
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //
+    public function fetchBadWords(): JsonResponse
+    {
+        try {
+            return response()->json([
+                'bad_words' => SiteSetting::where('key_setting', 'bad_words')->pluck('value_setting')->first(),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => substr($e->getMessage(), 0, 150)
+            ]);
+        }
+
+
+    }
+
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////

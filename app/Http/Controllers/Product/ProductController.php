@@ -77,9 +77,9 @@ class ProductController extends Controller
     {
         $products = Product::where("is_disabled", false)->get()->random(8);
         return response()->json([
-        "status" => 200,
-        "data" => $products,
-        "message" => "Get random product successfully."
+            "status" => 200,
+            "data" => $products,
+            "message" => "Get random product successfully."
         ], 200);
     }
 
@@ -131,7 +131,7 @@ class ProductController extends Controller
         if (array_reduce($variantsMessages, function ($pre, $cur) {
             return $pre || count($cur) > 0;
         })) {
-             $errors["variants"] = $variantsMessages;
+            $errors["variants"] = $variantsMessages;
         }
 
         if (count($errors) > 0) {
@@ -226,136 +226,136 @@ class ProductController extends Controller
         $product = Product::find($id);
         if ($product) {
             $validator = Validator::make($request->all(), [
-            "sku" => ["bail", "required", "regex:/^([A-Z0-9]+)$/", "min:2", "max:10", Rule::unique('products')->ignore($product)],
-            "name" => ["bail", "required", "regex:/([\p{L}0-9]+)$/u", "min:3", "max:100"],
-            "image" => "bail|mimes:jpeg,jpg,png,gif,bmp,webp,svg|max:2048",
-            'gallery.*' => 'bail|mimes:jpeg,jpg,png,gif,bmp,webp,svg|max:2048',
-            "description" => "bail|required|string",
-            'quantity' => 'bail|required|integer',
-            'origin_price' => 'bail|required|numeric',
-            'sell_price' => 'bail|required|numeric|gte:origin_price',
-            'discount_price' => 'bail|numeric|lt:sell_price|nullable',
-            "start_date" => 'date',
-            "end_date" => "bail|date|after:start_date",
-        ], $this->productMessages);
+                "sku" => ["bail", "required", "regex:/^([A-Z0-9]+)$/", "min:2", "max:10", Rule::unique('products')->ignore($product)],
+                "name" => ["bail", "required", "regex:/([\p{L}0-9]+)$/u", "min:3", "max:100"],
+                "image" => "bail|mimes:jpeg,jpg,png,gif,bmp,webp,svg|max:2048",
+                'gallery.*' => 'bail|mimes:jpeg,jpg,png,gif,bmp,webp,svg|max:2048',
+                "description" => "bail|required|string",
+                'quantity' => 'bail|required|integer',
+                'origin_price' => 'bail|required|numeric',
+                'sell_price' => 'bail|required|numeric|gte:origin_price',
+                'discount_price' => 'bail|numeric|lt:sell_price|nullable',
+                "start_date" => 'date',
+                "end_date" => "bail|date|after:start_date",
+            ], $this->productMessages);
 
-        $errors = [];
-        foreach ($validator->errors()->messages() as $key => $value) {
-            $newKey = explode(".", $key)[0];
-            $errors[$newKey] = $value[0];
-        }
-
-        $variantsMessages = [];
-        if ($request->has('variants')) {
-            $variants = json_decode($request->variants);
-            foreach ($variants as $variant) {
-                $validator = Validator::make((array) $variant, $this->variantRules, $this->productMessages);
-
-                $error = [];
-                foreach ($validator->errors()->messages() as $key => $value) {
-                    $error[$key] = $value[0];
-                }
-                array_push($variantsMessages, $error);
+            $errors = [];
+            foreach ($validator->errors()->messages() as $key => $value) {
+                $newKey = explode(".", $key)[0];
+                $errors[$newKey] = $value[0];
             }
-        }
 
-        if (array_reduce($variantsMessages, function ($pre, $cur) {
-            return $pre || count($cur) > 0;
-        })) {
-             $errors["variants"] = $variantsMessages;
-        }
+            $variantsMessages = [];
+            if ($request->has('variants')) {
+                $variants = json_decode($request->variants);
+                foreach ($variants as $variant) {
+                    $validator = Validator::make((array) $variant, $this->variantRules, $this->productMessages);
 
-        if (count($errors) > 0) {
+                    $error = [];
+                    foreach ($validator->errors()->messages() as $key => $value) {
+                        $error[$key] = $value[0];
+                    }
+                    array_push($variantsMessages, $error);
+                }
+            }
+
+            if (array_reduce($variantsMessages, function ($pre, $cur) {
+                return $pre || count($cur) > 0;
+            })) {
+                $errors["variants"] = $variantsMessages;
+            }
+
+            if (count($errors) > 0) {
+                return response()->json(
+                    [
+                        "status" => "error",
+                        "message" => "Xác thực dữ liệu đầu vào thất bại!",
+                        "errors" => $errors,
+                    ],
+                    400
+                );
+            }
+
+            if ($product->name !== $request->name) {
+                $i = 1;
+                $product->name = $request->name;
+                while (!!Product::where("name", "like", $product->name)->first()) {
+                    $product->name = $request->name . $i;
+                    $i++;
+                }
+            }
+
+            $product->sku = $request->sku;
+
+            $product->slug = $this->create_slug($product->name);
+            $product->description = $request->description;
+            $product->quantity = $request->quantity;
+            $product->origin_price = $request->origin_price;
+            $product->sell_price = $request->sell_price;
+
+            if ($request->has("discount_price")) {
+                $product->discount_price = $request->discount_price;
+                $product->start_date = $request->start_date;
+                $product->end_date = $request->end_date;
+            }
+
+            if ($request->has('category_id')) {
+                $product->category_id = $request->category_id;
+            }
+
+            if ($request->hasFile("image")) {
+                if (File::exists($product->image)) {
+                    File::delete($product->image);
+                }
+
+                $image = Image::make($request->file("image"));
+                $image->crop($request->width, $request->height, $request->left, $request->top);
+
+                $filename = time() . '_' . $request->file("image")->getClientOriginalName();
+                $parentPath = "images/product/";
+                $image->save(public_path($parentPath . $filename));
+                $product->image =  $parentPath . $filename ;
+            }
+
+            if ($request->hasFile("gallery") || $request->has("newGallery")) {
+                $oldGalleryArray = explode("|", $product->gallery);
+                $oldGallerySet = new \Ds\Set($oldGalleryArray);
+
+                $newGallery = $request->newGallery;
+                $newGallerySet = new \Ds\Set(explode("|", $newGallery));
+                $diffGallerySet = $oldGallerySet->diff($newGallerySet);
+
+                foreach ($diffGallerySet->toArray() as $file) {
+                    Storage::delete("public/$file");
+                }
+
+                $product->gallery = $newGallery;
+                if ($request->hasFile("gallery")) {
+                    foreach ($request->file("gallery") as $index => $image) {
+                        if ($index !== 0 || $product->gallery !== "") {
+                            $product->gallery .= "|";
+                        }
+                        $filename = time() . '_' . $image->getClientOriginalName();
+                        $parentPath = "images/product/gallery";
+                        $imagePath = $image->storeAs($parentPath, $filename, 'public');
+                        $product->gallery .= $imagePath;
+                    }
+                }
+            }
+
+            if ($request->has('variants')) {
+                $product->variants = $request->variants;
+            }
+
+            $product->save();
+
             return response()->json(
                 [
-                    "status" => "error",
-                    "message" => "Xác thực dữ liệu đầu vào thất bại!",
-                    "errors" => $errors,
+                    "status" => "ok",
+                    "message" => "Cập nhật sản phẩm thành công!"
                 ],
-                400
+                200
             );
-        }
-
-        if ($product->name !== $request->name) {
-            $i = 1;
-            $product->name = $request->name;
-            while (!!Product::where("name", "like", $product->name)->first()) {
-                $product->name = $request->name . $i;
-                $i++;
-            }
-        }
-
-        $product->sku = $request->sku;
-
-        $product->slug = $this->create_slug($product->name);
-        $product->description = $request->description;
-        $product->quantity = $request->quantity;
-        $product->origin_price = $request->origin_price;
-        $product->sell_price = $request->sell_price;
-
-        if ($request->has("discount_price")) {
-            $product->discount_price = $request->discount_price;
-            $product->start_date = $request->start_date;
-            $product->end_date = $request->end_date;
-        }
-
-        if ($request->has('category_id')) {
-            $product->category_id = $request->category_id;
-        }
-
-        if ($request->hasFile("image")) {
-            if (File::exists($product->image)) {
-                File::delete($product->image);
-            }
-
-            $image = Image::make($request->file("image"));
-            $image->crop($request->width, $request->height, $request->left, $request->top);
-
-            $filename = time() . '_' . $request->file("image")->getClientOriginalName();
-            $parentPath = "images/product/";
-            $image->save(public_path($parentPath . $filename));
-            $product->image =  $parentPath . $filename ;
-        }
-
-        if ($request->hasFile("gallery") || $request->has("newGallery")) {
-            $oldGalleryArray = explode("|", $product->gallery);
-            $oldGallerySet = new \Ds\Set($oldGalleryArray);
-
-            $newGallery = $request->newGallery;
-            $newGallerySet = new \Ds\Set(explode("|", $newGallery));
-            $diffGallerySet = $oldGallerySet->diff($newGallerySet);
-
-            foreach ($diffGallerySet->toArray() as $file) {
-                Storage::delete("public/$file");
-            }
-
-            $product->gallery = $newGallery;
-            if ($request->hasFile("gallery")) {
-                foreach ($request->file("gallery") as $index => $image) {
-                    if ($index !== 0 || $product->gallery !== "") {
-                        $product->gallery .= "|";
-                    }
-                    $filename = time() . '_' . $image->getClientOriginalName();
-                    $parentPath = "images/product/gallery";
-                    $imagePath = $image->storeAs($parentPath, $filename, 'public');
-                    $product->gallery .= $imagePath;
-                }
-            }
-        }
-
-        if ($request->has('variants')) {
-            $product->variants = $request->variants;
-        }
-
-        $product->save();
-
-        return response()->json(
-            [
-                "status" => "ok",
-                "message" => "Cập nhật sản phẩm thành công!"
-            ],
-            200
-        );
         }
     }
 
@@ -407,9 +407,21 @@ class ProductController extends Controller
         }
     }
 
-    public function getProductsByName($name) {
+    public function getProductsByName($name, $userId = null) {
         $products = Product::where('name', 'like', "%$name%")->get();
-       //sua
+
+        foreach ($products as $product) {
+            $product->love = false;
+            if ($userId) {
+                $love = DB::table("wishlists")->where('product_id', $product->id)
+                    ->where('user_id', $userId)->get();
+                if ($love->count() > 0) {
+                    $product->love = true;
+                }
+            }
+        }
+
+        //sua
         return response()->json(["message" => "OK!", "data" => $products], 200);
     }
 
@@ -459,8 +471,8 @@ class ProductController extends Controller
     {
         $product = Product::find($id);
         $comments = $product->comments()->join("users", "users.id", "=" , "product_comments.user_id")
-        ->select("product_comments.*", "users.full_name")
-        ->get();
+            ->select("product_comments.*", "users.full_name")
+            ->get();
         return response()->json([
             "status" => "ok",
             "message" => "success",
@@ -472,8 +484,8 @@ class ProductController extends Controller
     {
         $product = Product::find($id);
         $reviews = $product->reviews()->join("users", "users.id", "=" , "reviews.user_id")
-        ->select("reviews.*", "users.full_name")
-        ->get();
+            ->select("reviews.*", "users.full_name")
+            ->get();
         return response()->json([
             "message" => "success",
             "data" => $reviews,
@@ -492,7 +504,7 @@ class ProductController extends Controller
             'http' => array(
                 'method' => 'POST',
                 'header' => 'Content-type: application/json' . "\r\n" .
-                            'Authorization: Bearer ' . $api_key . "\r\n",
+                    'Authorization: Bearer ' . $api_key . "\r\n",
                 'content' => "{\"tool_id\":\"$tool_id\",\"product_name\":\"$request->name\",\"product_desc\":\"$request->description\",\"tone\":\"professional\",\"language\":{\"id\":\"vi_VN\",\"formality\":\"more\"}}"
             )
         );
@@ -535,8 +547,8 @@ class ProductController extends Controller
         $sku = $request->sku;
         $skuArr = explode('-', $sku);
         $product = Product::where('sku', 'like', $skuArr[0])
-        ->select('id', 'sku', 'name', 'slug','sell_price', 'origin_price', 'discount_price', 'quantity', 'image', 'variants', 'start_date', 'end_date')
-        ->first();
+            ->select('id', 'sku', 'name', 'slug','sell_price', 'origin_price', 'discount_price', 'quantity', 'image', 'variants', 'start_date', 'end_date')
+            ->first();
 
         if ($product->count() === 0) {
             return response()->json(["message" => "Không tìm thấy dữ liệu", "status" => "error"], 200);

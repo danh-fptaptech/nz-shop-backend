@@ -9,6 +9,7 @@ use App\Http\Controllers\ListAddressController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SiteSettingController;
+use App\Http\Controllers\TrackingController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Product\ProductController;
@@ -66,17 +67,6 @@ Route::get('orderByCode/{code}', [OrderController::class, 'orderByCode']);
 Route::post('createStripePayment', [TransactionController::class, 'createStripePayment']);
 Route::post('createVNPayLink', [TransactionController::class, 'createVNPayLink']);
 Route::post('runVNPay', [TransactionController::class, 'runVNPay']);
-Route::get('fetchListTransaction',[TransactionController::class,'fetchListTransaction']);
-
-
-Route::get('timenow', function () {
-    $data = [
-        'date' => now()->format('Y-m-d H:i:s:e'),
-        'timezone' => config('app.timezone'),
-        'timezoneOffset' => now()->format('P')
-    ];
-    return response()->json(['date'=>now(),'timezone'=>config('app.timezone'),'ket qua'=>$data,'time'=>time()]);
-});
 
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -93,6 +83,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('users/{id}', [AuthController::class, 'infoUserID']);
     Route::post('searchUsers', [UserController::class, 'getListUserByQuery']);
     Route::get('getListUser', [UserController::class, 'getListUser']);
+    Route::put('updateUser1/{id}', [AuthController::class, 'updateUser1']);
+    Route::put('changePassword/{id}', [AuthController::class, 'changePassword']);
 
     //_____________________________________________________________________
     //  Role Management
@@ -141,6 +133,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('fetchSSetting', [SiteSettingController::class, 'fetchSSetting']);
     Route::get('fetchSEOSetting', [SiteSettingController::class, 'fetchSEOSetting']);
     Route::get('fetchDSetting', [SiteSettingController::class, 'fetchDSetting']);
+    Route::get('fetchBadWords', [SiteSettingController::class, 'fetchBadWords']);
 
 
     //_____________________________________________________________________
@@ -148,11 +141,22 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('fetchListOrder', [OrderController::class, 'fetchListOrder']);
     Route::get('fetchOrdersOfUser', [OrderController::class, 'fetchOrdersOfUser']);
 
+    //_____________________________________________________________________
+    //    Transaction Management
+    Route::get('fetchListTransaction', [TransactionController::class, 'fetchListTransaction']);
+
+
+    //_____________________________________________________________________
+    //    Tracking Management
+    Route::post('createTracking', [TrackingController::class, 'createTracking']);
+    Route::put('updateDeliverInfo/{id}', [TrackingController::class, 'updateDeliverInfo']);
+    Route::get('fetchListTracking', [TrackingController::class, 'fetchListTracking']);
+
 
 });
 // Long
 Route::post("/description", [DescriptionController::class, "storeImageUpload"]);
-Route::get("/products/name/{name}", [ProductController::class, "getProductsByName"]);
+Route::get("/products/name/{name}/{userId?}", [ProductController::class, "getProductsByName"]);
 Route::get("/products", [ProductController::class, "getAllProducts"]);
 Route::get("/randomProducts", [ProductController::class, "randomProducts"]);
 Route::post("/products", [ProductController::class, "createOneProduct"]);
@@ -178,7 +182,8 @@ Route::put("/categories/disable/{id}", [CategoryController::class, "disableRecur
 Route::put("/categories/enable/{id}", [CategoryController::class, "enableRecursiveCategories"]);
 Route::get("/categories/{id}", [CategoryController::class, "getSubCategories"]);
 Route::put("/categories/update/{id}", [CategoryController::class, "updateOneCategory"]);
-Route::get("/recursive-categories/{id}/products/{numbers?}", [CategoryController::class, "getFinalProductsByRecursiveCategoryId"]);
+Route::get("/recursive-categories/{id}/products/{numbers?}/{userId?}",
+    [CategoryController::class, "getFinalProductsByRecursiveCategoryId"]);
 Route::get("/recursive-categories/{id}", [CategoryController::class, "getRecursiveCategories"]);
 Route::get("/category-pagination", [CategoryController::class, "getCategoryPagination"]);
 
@@ -208,7 +213,8 @@ Route::put("/product-comments/toggle/{id}", [ProductCommentController::class, "t
 Route::delete("/product-comments/delete/{id}", [ProductCommentController::class, "deleteOneCommentProduct"]);
 Route::get("/product-comments/{id}/product-feedbacks", [ProductCommentController::class, "getAllProductFeedBacksById"]);
 Route::get("/product-comment-pagination", [ProductCommentController::class, "getCommentPagination"]);
-Route::get("/product-comment-pagination/{id}/feedback", [ProductCommentController::class, "getFeedbackCommentPagination"]);
+Route::get("/product-comment-pagination/{id}/feedback",
+    [ProductCommentController::class, "getFeedbackCommentPagination"]);
 
 //Wish
 Route::get("/wishlists", [WishlistController::class, "getAllWishlists"]);

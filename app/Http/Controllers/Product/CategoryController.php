@@ -13,25 +13,25 @@ use Illuminate\Support\Facades\DB;
 class CategoryController extends Controller
 {
     private $rules = [
-                "name" => "bail|required|string|min:2|max:25",
-                "image" => "bail|required|mimes:jpeg,jpg,png,gif,bmp,svg,webp|max:2048",
-                "description" => "bail|required|string",
-            ];
-    
+        "name" => "bail|required|string|min:2|max:25",
+        "image" => "bail|required|mimes:jpeg,jpg,png,gif,bmp,svg,webp|max:2048",
+        "description" => "bail|required|string",
+    ];
+
     private $updateRules = [
-                "name" => "bail|required|string|min:2|max:25",
-                "image" => "bail|mimes:jpeg,jpg,png,gif,bmp,svg,webp|max:2048",
-                "description" => "bail|required|string",
-            ];
+        "name" => "bail|required|string|min:2|max:25",
+        "image" => "bail|mimes:jpeg,jpg,png,gif,bmp,svg,webp|max:2048",
+        "description" => "bail|required|string",
+    ];
 
     private $messages = [
-                "required" => "Không được bỏ trống!",
-                "name.min" => "Tên quá ngắn!",
-                "name.max" => "Tên quá dài!",
-                "image.required" => "Chưa chọn hình ảnh!",
-                "image.max" => "Hình ảnh không được vượt quá 2MB!",
-                "image.mimes" => "Tệp hình ảnh phải là tệp jpeg, png, jpg, gif, svg, webp hoặc bmp!",
-            ];
+        "required" => "Không được bỏ trống!",
+        "name.min" => "Tên quá ngắn!",
+        "name.max" => "Tên quá dài!",
+        "image.required" => "Chưa chọn hình ảnh!",
+        "image.max" => "Hình ảnh không được vượt quá 2MB!",
+        "image.mimes" => "Tệp hình ảnh phải là tệp jpeg, png, jpg, gif, svg, webp hoặc bmp!",
+    ];
 
     public function getAllCategories() {
         $categories = Category::where('is_disabled', false)->get();
@@ -40,7 +40,7 @@ class CategoryController extends Controller
                 [
                     "data" => $categories,
                     "message" => "Get all categories successfully!"
-                ], 
+                ],
                 200
             );
         }
@@ -58,8 +58,8 @@ class CategoryController extends Controller
 
         if (!$request->has('parent_category_id')) {
             $validator = Validator::make(
-                $request->all(), 
-                ["icon" => "bail|required|mimes:svg|max:2048"], 
+                $request->all(),
+                ["icon" => "bail|required|mimes:svg|max:2048"],
                 [
                     "icon.required" => "Chưa chọn icon!",
                     "icon.max" => "Icon không được vượt quá 2MB!",
@@ -85,46 +85,46 @@ class CategoryController extends Controller
         $category->name = $request->name;
 
         $filename = time() . '_' . $request->file("image")->getClientOriginalName();
-        $parentPath = "images/category"; 
+        $parentPath = "images/category";
         $imagePath = $request->file("image")->storeAs($parentPath, $filename, 'public');
-        $category->image = $imagePath;   
+        $category->image = $imagePath;
 
-        $category->description = $request->description; 
+        $category->description = $request->description;
 
         if ($request->has('is_brand')) {
-            $category->is_brand = $request->boolean('is_brand'); 
+            $category->is_brand = $request->boolean('is_brand');
         }
 
         if ($request->has('parent_category_id')) {
-            $category->parent_category_id = $request->parent_category_id; 
+            $category->parent_category_id = $request->parent_category_id;
         }
- 
+
         if ($request->hasFile("icon")) {
             $filename = time() . '_' . $request->file("icon")->getClientOriginalName();
-            $parentPath = "images/category/icon";  
+            $parentPath = "images/category/icon";
             $imagePath = $request->file("icon")->storeAs($parentPath, $filename, 'public');
             $category->icon = $imagePath;
-        }      
+        }
 
         $category->save();
 
         return response()->json(
             [
                 "message" => "Create a category successfully!"
-            ], 
+            ],
             201
         );
     }
-    
+
     public function deleteOneCategory($id) {
         $category = Category::find($id);
-        
+
         $category->delete();
 
         return response()->json(
             [
                 "message" => "Delete successfully!"
-            ], 
+            ],
             200
         );
     }
@@ -133,38 +133,38 @@ class CategoryController extends Controller
         $category = Category::find($id);
 
         $childCategories = Category::where("parent_category_id", $category->id)->get();
-        
-        if ($childCategories->count() > 0) {    
+
+        if ($childCategories->count() > 0) {
             foreach ($childCategories as $childCategory) {
                 $this->disableRecursiveCategories($childCategory->id);
             }
         }
-                 
+
         $category->is_disabled = true;
         $category->save();
 
         return response()->json(
             [
                 "message" => "Disable successfully!"
-            ], 
+            ],
             200
         );
     }
 
     public function enableRecursiveCategories($id) {
         $category = Category::find($id);
-        
-        if ($category->parent_category_id) {    
-            $this->enableRecursiveCategories($category->parent_category_id);   
+
+        if ($category->parent_category_id) {
+            $this->enableRecursiveCategories($category->parent_category_id);
         }
-                 
+
         $category->is_disabled = false;
         $category->save();
 
         return response()->json(
             [
                 "message" => "Enable successfully!"
-            ], 
+            ],
             200
         );
     }
@@ -177,7 +177,7 @@ class CategoryController extends Controller
                 [
                     "data" => $childCategories,
                     "message" => "Get all categories successfully!"
-                ], 
+                ],
                 200
             );
         }
@@ -195,8 +195,8 @@ class CategoryController extends Controller
 
         if (!$request->has('parent_category_id') && $request->hasFile("icon")) {
             $validator = Validator::make(
-                $request->all(), 
-                ["icon" => "bail|mimes:svg|max:2048"], 
+                $request->all(),
+                ["icon" => "bail|mimes:svg|max:2048"],
                 [
                     "icon.max" => "Icon không được vượt quá 2MB!",
                     "icon.mimes" => "Icon phải là tệp svg!",
@@ -220,24 +220,24 @@ class CategoryController extends Controller
         $category = Category::find($id);
 
         $category->name = $request->name;
-        
+
         if ($request->hasFile('image')) {
             Storage::delete("public/$category->image");
 
-            $filename = time() . '_' . $request->file("image")->getClientOriginalName(); 
+            $filename = time() . '_' . $request->file("image")->getClientOriginalName();
             $parentPath = "images/category";
             $imagePath = $request->file("image")->storeAs($parentPath, $filename, 'public');
-            $category->image = $imagePath;   
+            $category->image = $imagePath;
         }
 
         $category->description = $request->description;
 
         if ($request->has('is_brand')) {
-            $category->is_brand = $request->boolean('is_brand'); 
+            $category->is_brand = $request->boolean('is_brand');
         }
 
         if ($request->has('parent_category_id')) {
-            $category->parent_category_id = $request->parent_category_id; 
+            $category->parent_category_id = $request->parent_category_id;
         }
 
         if (!$request->has('parent_category_id') && $request->hasFile("icon")) {
@@ -254,16 +254,24 @@ class CategoryController extends Controller
         return response()->json(
             [
                 "message" => "Update a category successfully!"
-            ], 
+            ],
             200
         );
     }
 
-    public function getFinalProductsByRecursiveCategoryId($id, $numbers = null) {
+    public function getFinalProductsByRecursiveCategoryId($id, $numbers = null, $userId = null) {
         $products = $this->getProductsByRecursiveCategoryId($id, $numbers);
         foreach ($products as $product) {
             $product->rating = $product->reviews()->avg('rating');
             $product->ratingCount = $product->reviews()->count('rating');
+            $product->love = false;
+            if ($userId) {
+                $love = DB::table("wishlists")->where('product_id', $product->id)
+                    ->where('user_id', $userId)->get();
+                if ($love->count() > 0) {
+                    $product->love = true;
+                }
+            }
         }
         return response()->json([
             "data" =>  $products,
@@ -294,7 +302,7 @@ class CategoryController extends Controller
         return $result;
     }
 
-     public function getCategoryPagination() {
+    public function getCategoryPagination() {
         $categories = DB::table('categories');
 
         if (request()->query('is_disabled')) {

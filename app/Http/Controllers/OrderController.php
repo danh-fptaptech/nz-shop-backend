@@ -46,6 +46,11 @@ class OrderController extends Controller
             $price = $product['info']['discount_price'] ?: $product['info']['sell_price'];
             return $total + (floatval($price) * $product['quantity']);
         }, 0);
+
+        $valueCoupon = 0;
+        $typeCoupon = "";
+        $typeVCoupon = "";
+        $maxvCoupon = 0;
 //       Kiểm tra Coupon còn hiệu lực không
         if ($request->input(['coupon'])) {
             $CouponController = new CouponController();
@@ -62,6 +67,7 @@ class OrderController extends Controller
             $valueCoupon = $dataCoupon->value;
             $typeCoupon = $dataCoupon->type_coupon;
             $typeVCoupon = $dataCoupon->type_value;
+            $maxvCoupon = json_decode($dataCoupon->coupon_requests)->MaxValue;
         }
 
         $order = Order::create([
@@ -98,7 +104,6 @@ class OrderController extends Controller
             $valueDiscount = 0;
             $priceShipping = json_decode($order->delivery)->value;
 
-
 //        ->Tính phí ship khách hàng trả:
 //        ->Nếu có mã coupon miễn phí vận chuyển:
         if ($request->input(['coupon']) && $typeVCoupon === 'free_shipping') {
@@ -123,6 +128,10 @@ class OrderController extends Controller
             $price = $product['info']['origin_price'];
             return $total + (floatval($price) * $product['quantity']);
         }, 0);
+
+        if($maxvCoupon>0){
+            $valueDiscount = max($maxvCoupon, $valueDiscount);
+        }
 
         $calProfit = $totalValue - $costOfGoods - $valueDiscount;
 

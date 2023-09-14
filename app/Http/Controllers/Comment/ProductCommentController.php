@@ -8,6 +8,7 @@ use App\Models\Post_feedback;
 use App\Models\Product_comment;
 use App\Models\Product_feedback;
 use App\Models\Review;
+use App\Models\SiteSetting;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -18,14 +19,14 @@ class ProductCommentController extends Controller
         $comments = DB::table('product_comments')
         ->join('users', 'users.id', '=', 'product_comments.user_id')
         ->join('products', 'products.id', '=', 'product_comments.product_id')
-        ->leftJoin("product_feedbacks", "product_comments.id", "=", "product_feedbacks.product_comment_id") 
+        ->leftJoin("product_feedbacks", "product_comments.id", "=", "product_feedbacks.product_comment_id")
         ->select('product_comments.id', 'product_comments.comment', 'product_comments.is_approved', 'product_comments.created_at',
-        'users.full_name', 'products.name as product_name', DB::raw('count(*) as feedback_count'),  
+        'users.full_name', 'products.name as product_name', DB::raw('count(*) as feedback_count'),
         DB::raw('count(CASE WHEN product_feedbacks.is_approved <> 1 THEN 1 END) as pending_feedback_count'))
-        ->groupBy('product_comments.id', 'product_comments.comment', 'users.full_name', 'product_name', 
+        ->groupBy('product_comments.id', 'product_comments.comment', 'users.full_name', 'product_name',
         'product_comments.is_approved', 'product_comments.created_at')
         ->get();
-            
+
         if ($comments->count() > 0) {
             return response()->json(
                 [
@@ -36,21 +37,20 @@ class ProductCommentController extends Controller
             );
         }
 
-        return response()->noContent();    
+        return response()->noContent();
     }
 
     public function createOneCommentProduct(Request $request) {
-        $hello = DB::table("a")->where("a", "like", "keyword")->first();
-        
-        $keywordArr = explode(",", $hello->value);
+        $hello = SiteSetting::where('key_setting', 'bad_words')->pluck('value_setting')->first();
+
+        $keywordArr = explode(",", $hello);
         $wordArr = explode(" ", $request->comment);
-        
+
         if (count(array_intersect($keywordArr, $wordArr)) > 0) {
             return response()->json([
                     "status" => "error",
                     "message" => "Binh luan chua tu nhay cam!",
-                ],
-            400);
+                ]);
         }
 
         $comment = Product_comment::create($request->all());
@@ -60,7 +60,8 @@ class ProductCommentController extends Controller
             return response()->json(
                 [
                     "data" => $comment,
-                    "message" => "Create a comment successfully",
+                    "status" => "ok",
+                    "message" => "Bình luận thành công!",
                 ],
                 201
             );
@@ -80,7 +81,7 @@ class ProductCommentController extends Controller
 
     public function deleteOneCommentProduct($id) {
         $comment = Product_comment::find($id);
- 
+
         $comment->delete();
 
         return response()->json([
@@ -101,13 +102,13 @@ class ProductCommentController extends Controller
     public function getUserByCommentId($id) {
         $user = Product_comment::find($id)->user;
 
-        return response()->json(["data" => $user, "message" => "success"], 200); 
+        return response()->json(["data" => $user, "message" => "success"], 200);
     }
 
     public function getProductByCommentId($id) {
         $product = Product_comment::find($id)->product;
 
-        return response()->json(["data" => $product, "message" => "success"], 200); 
+        return response()->json(["data" => $product, "message" => "success"], 200);
     }
 
     public function commentToday() {
@@ -120,21 +121,21 @@ class ProductCommentController extends Controller
 
         $reivewtoday = Review::whereDate('created_at', $today)->count();
 
-        return response()->json(["todayPostComment" => $postcommenttoday + $postfeedbackstoday,"todayProductComment" => $productcommenttoday +  $productfeedbackstoday, "todayReview"=> $reivewtoday ,"message" => "success"], 200); 
+        return response()->json(["todayPostComment" => $postcommenttoday + $postfeedbackstoday,"todayProductComment" => $productcommenttoday +  $productfeedbackstoday, "todayReview"=> $reivewtoday ,"message" => "success"], 200);
     }
-    
+
 
     public function getCommentPagination() {
         $comments = DB::table('product_comments')
         ->join('users', 'users.id', '=', 'product_comments.user_id')
         ->join('products', 'products.id', '=', 'product_comments.product_id')
-        ->leftJoin("product_feedbacks", "product_comments.id", "=", "product_feedbacks.product_comment_id") 
+        ->leftJoin("product_feedbacks", "product_comments.id", "=", "product_feedbacks.product_comment_id")
         ->select('products.slug','product_comments.id', 'product_comments.comment', 'product_comments.is_approved', 'product_comments.created_at',
         'users.full_name', 'products.name as product_name', DB::raw('count(product_feedbacks.id) as feedback_count'),
         DB::raw('count(CASE WHEN product_feedbacks.is_approved <> 1 THEN 1 END) as pending_feedback_count'))
-        ->groupBy('products.slug','product_comments.id', 'product_comments.comment', 'users.full_name', 'product_name', 
+        ->groupBy('products.slug','product_comments.id', 'product_comments.comment', 'users.full_name', 'product_name',
         'product_comments.is_approved', 'product_comments.created_at')->orderBy('product_comments.created_at', 'DESC');
-        
+
 
         if (request()->query('is_approved')) {
             $comments = $comments->where('product_comments.is_approved', '=', request()->boolean('is_approved'));
